@@ -177,7 +177,7 @@ CREATE INDEX idx_message_type ON commits(message_type);
 **Çözüm:** Grok AI (X.ai) OpenAI uyumlu API'ye geçildi
 
 ### 2. **API Hataları & Fallback**
-
 **Problem:** API limitler veya hata durumlarında sistemin tamamen başarısız olması
+
 **Çözüm:** Akıllı fallback modu - diff analiz ederek otomatik mesaj üretimi
 ---
