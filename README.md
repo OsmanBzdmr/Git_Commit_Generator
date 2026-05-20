@@ -11,7 +11,7 @@ Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI taraf
 - 📊 **Git diff analizi** - dosya sayısı, eklemeler, silmeler istatistikleri
 - 💾 **SQLite database** - tüm oluşturulan mesajların geçmişi
 - 🎨 **Modern web arayüzü** - kullanıcı dostu, responsive design
-- 📜 **Geçmiş görüntüleme** - son oluşturulan 50 commit mesajı
+- 📜 **Geçmiş görüntüleme** - son oluşturulan 5 commit mesajı
 
 ---
 
