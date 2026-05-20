@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Git Commit Message Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 Git Commit Generator</h1>
+      <p>Kod değişikliklerinizi AI ile analiz edip standart format commit mesajı oluşturun</p>
+    </header>
+
+    <main>
+      <section class="input-section">
+        <div class="section-header">
+          <h2>📝 Git Diff Girin</h2>
+          <span class="hint">Diff'i yapıştırın</span>
+        </div>
+        <textarea id="diffInput" placeholder="$ git diff
+diff --git a/file.js b/file.js
+@@ -10,5 +10,8 @@
+-  oldCode();
++  // New feature
++  newCode();
++  console.log('updated');" rows="12"></textarea>
+        <button id="generateBtn" class="btn-primary">✨ Mesaj Oluştur</button>
+      </section>
+
+      <section class="result-section" id="resultSection" style="display: none;">
+        <h2>✅ Oluşturulan Commit Mesajı</h2>
+        
+        <div class="result-card">
+          <div class="result-row">
+            <label>Türü:</label>
+            <div class="type-container">
+              <span id="msgType" class="type-badge"></span>
+              <span class="type-explanation" id="typeExpl"></span>
+            </div>
+          </div>
+
+          <div class="result-row">
+            <label>Başlık:</label>
+            <p id="msgTitle" class="message-title"></p>
+          </div>
+
+          <div class="result-row" id="descriptionRow" style="display: none;">
+            <label>Detay:</label>
+            <p id="msgDescription"></p>
+          </div>
+
+          <div class="result-row full-width">
+            <label>Tam Commit Mesajı:</label>
+            <div class="formatted-message">
+              <pre id="formattedMsg"></pre>
+              <button id="copyBtn" class="btn-copy">📋 Kopyala</button>
+            </div>
+          </div>
+
+          <div class="stats-container">
+            <div class="stat-item">
+              <span class="stat-label">Dosya</span>
+              <span class="stat-value" id="statFiles">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Ekleme</span>
+              <span class="stat-value stat-add" id="statAdds">+0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Silme</span>
+              <span class="stat-value stat-del" id="statDels">-0</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="history-section">
+        <div class="section-header">
+          <h2>📜 Geçmiş (Son 5)</h2>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Grok AI (X.ai) powered | SQLite database</p>
+    </footer>
+  </div>
+
+  <div id="loading" class="loading" style="display: none;">
+    <div class="spinner"></div>
+    <p>Mesaj oluşturuluyor...</p>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
