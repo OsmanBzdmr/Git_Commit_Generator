@@ -171,20 +171,11 @@ CREATE INDEX idx_message_type ON commits(message_type);
 
 ## 🔍 Karşılaşılan Zorluklar & Çözümler
 
-### 1. **Groq → Grok API Migrasyon**
-**Problem:** Groq API key ile model bulunamıyor hatası
+### 1. **AI API Entegrasyonları**
+**Problem:** Farklı dil modellerinde yaşanan limit ve entegrasyon problemleri
 **Çözüm:** Grok AI (X.ai) OpenAI uyumlu API'ye geçildi
 
 ### 2. **API Hataları & Fallback**
 **Problem:** API limitler veya hata durumlarında sistemin tamamen başarısız olması
 **Çözüm:** Akıllı fallback modu - diff analiz ederek otomatik mesaj üretimi
-
-### 3. **Diff Parsing Edge Cases**
-**Problem:** Farklı diff formatları (binary, merge, vb.)
-**Çözüm:** Regex-based robust parser, safe fallback
-
-### 4. **Port Konflikti**
-**Problem:** Port 3000 zaten kullanımda
-**Çözüm:** Process kill + restart mekanizması
-
 ---
