@@ -180,4 +180,5 @@ CREATE INDEX idx_message_type ON commits(message_type);
 **Problem:** API limitler veya hata durumlarında sistemin tamamen başarısız olması
 
 **Çözüm:** Akıllı fallback modu - diff analiz ederek otomatik mesaj üretimi
+
 ---
