@@ -173,6 +173,7 @@ CREATE INDEX idx_message_type ON commits(message_type);
 
 ### 1. **AI API Entegrasyonları**
 **Problem:** Farklı dil modellerinde yaşanan limit ve entegrasyon problemleri
+
 **Çözüm:** Grok AI (X.ai) OpenAI uyumlu API'ye geçildi
 
 ### 2. **API Hataları & Fallback**
