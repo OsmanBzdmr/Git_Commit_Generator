@@ -11,7 +11,7 @@ Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI taraf
 - 📊 **Git diff analizi** - dosya sayısı, eklemeler, silmeler istatistikleri
 - 💾 **SQLite database** - tüm oluşturulan mesajların geçmişi
 - 🎨 **Modern web arayüzü** - kullanıcı dostu, responsive design
-- 📜 **Geçmiş görüntüleme** - son oluşturulan 50 commit mesajı
+- 📜 **Geçmiş görüntüleme** - son oluşturulan 5 commit mesajı
 
 ---
 
@@ -89,60 +89,6 @@ npm start
 ```
 http://localhost:3000
 ```
-
----
-
-## 📚 API Endpoints
-
-### POST `/api/generate-message`
-Git diff'ini gönder, commit mesajı al.
-
-**Request:**
-```json
-{
-  "diff": "diff --git a/file.js b/file.js\n..."
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "type": "feat",
-  "message": "Add automatic commit message generation",
-  "description": "Modified 1 file(s): +120 -35 lines",
-  "formatted": "feat: Add automatic commit message generation\n\nModified 1 file(s): +120 -35 lines",
-  "stats": {
-    "filesChanged": 5,
-    "additions": 120,
-    "deletions": 35,
-    "files": ["src/api.js", "routes/api.js", ...]
-  }
-}
-```
-
-### GET `/api/history`
-Son 50 commit mesajının geçmişini getir.
-
-**Response:**
-```json
-{
-  "success": true,
-  "commits": [
-    {
-      "id": 1,
-      "diff_input": "...",
-      "generated_message": "feat: Add feature",
-      "message_type": "feat",
-      "files_changed": 3,
-      "additions": 50,
-      "deletions": 10,
-      "created_at": "2026-05-20T12:30:00Z"
-    }
-  ]
-}
-```
-
 ---
 
 ## 🧪 Testing
@@ -225,20 +171,14 @@ CREATE INDEX idx_message_type ON commits(message_type);
 
 ## 🔍 Karşılaşılan Zorluklar & Çözümler
 
-### 1. **Groq → Grok API Migrasyon**
-**Problem:** Groq API key ile model bulunamıyor hatası
+### 1. **AI API Entegrasyonları**
+**Problem:** Farklı dil modellerinde yaşanan limit ve entegrasyon problemleri
+
 **Çözüm:** Grok AI (X.ai) OpenAI uyumlu API'ye geçildi
 
 ### 2. **API Hataları & Fallback**
 **Problem:** API limitler veya hata durumlarında sistemin tamamen başarısız olması
+
 **Çözüm:** Akıllı fallback modu - diff analiz ederek otomatik mesaj üretimi
-
-### 3. **Diff Parsing Edge Cases**
-**Problem:** Farklı diff formatları (binary, merge, vb.)
-**Çözüm:** Regex-based robust parser, safe fallback
-
-### 4. **Port Konflikti**
-**Problem:** Port 3000 zaten kullanımda
-**Çözüm:** Process kill + restart mekanizması
 
 ---
