@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const grokApi = require('../src/groqApi');
+const ollamaApi = require('../src/ollamaApi');
 const diffParser = require('../src/diffParser');
 const examParser = require('../src/examParser');
 const msgFormatter = require('../src/msgFormatter');
@@ -44,7 +44,7 @@ router.post('/api/generate-message', async (req, res) => {
     } else {
       // Handle git diff format
       const stats = diffParser.parseDiff(diff);
-      const aiResult = await grokApi.generateCommitMessage(diff);
+      const aiResult = await ollamaApi.generateCommitMessage(diff);
       
       const formattedMessage = msgFormatter.formatCommitMessage(
         aiResult.type,

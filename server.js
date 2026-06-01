@@ -38,7 +38,8 @@ app.listen(PORT, () => {
 ╔════════════════════════════════════════════════════════╗
 ║   🚀 Git Commit Mesajı Generator başlatıldı!          ║
 ║   📍 http://localhost:${PORT}                             ║
-║   🔑 GROK_API_KEY: ${process.env.GROK_API_KEY ? '✅ Ayarlandı' : '❌ Ayarlanmadı'}                        ║
+║   🤖 Ollama: ${process.env.OLLAMA_URL || 'http://localhost:11434'}                          ║
+║   📦 Model: ${process.env.OLLAMA_MODEL || 'mistral:7b'}                        ║
 ╚════════════════════════════════════════════════════════╝
   `);
 });

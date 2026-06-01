@@ -5,8 +5,8 @@
 Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI tarafından otomatik olarak standart format commit mesajları** oluşturmasını sağlayan web uygulaması.
 
 ### ✨ Temel Özellikler
-- 🤖 **Grok AI (X.ai)** ile AI-powered commit mesajı oluşturma
-- 🧠 **Akıllı fallback modu** - API hataları olsa bile istatistik-bazlı mesaj üretimi
+- 🤖 **Ollama AI** ile yerel ve hızlı AI-powered commit mesajı oluşturma
+- 🧠 **Akıllı fallback modu** - AI hataları olsa bile istatistik-bazlı mesaj üretimi
 - 🏷️ **Conventional Commits** standardına uygun (feat, fix, docs, refactor, test, chore, style, perf)
 - 📊 **Git diff analizi** - dosya sayısı, eklemeler, silmeler istatistikleri
 - 💾 **SQLite database** - tüm oluşturulan mesajların geçmişi
@@ -21,7 +21,7 @@ Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI taraf
 ```
 commit-msg-generator/
 ├── src/
-│   ├── groqApi.js        # Grok AI entegrasyon + fallback
+│   ├── ollamaApi.js      # Ollama AI entegrasyon + fallback
 │   ├── diffParser.js     # Git diff parsing ve analiz
 │   ├── msgFormatter.js   # Commit mesajı formatı
 │   ├── database.js       # SQLite database işlemleri
@@ -49,7 +49,7 @@ commit-msg-generator/
 | **Frontend** | HTML5, CSS3, Vanilla JavaScript |
 | **Backend** | Node.js, Express.js |
 | **Database** | SQLite3 |
-| **AI Model** | Grok AI (X.ai) - OpenAI uyumlu API |
+| **AI Model** | Ollama (Mistral 7B) - Yerel çalışan model |
 | **Testing** | Jest |
 
 ---
@@ -58,34 +58,44 @@ commit-msg-generator/
 
 ### Gereksinimler
 - Node.js 18+
-- Grok API Key ([https://console.x.ai/](https://console.x.ai/))
+- Ollama ([https://ollama.ai](https://ollama.ai))
+- 16GB RAM (Mistral 7B modeli için önerilen)
 
 ### Kurulum
 
-1. **Depoyu klonla ve bağımlılıkları yükle:**
+1. **Ollama kur ve Mistral modelini indir:**
+```bash
+# Ollama'yı indir ve kur (https://ollama.ai)
+ollama pull mistral:7b
+ollama serve
+```
+
+2. **Depoyu klonla ve bağımlılıkları yükle:**
 ```bash
 cd commit-msg-generator
 npm install
 ```
 
-2. **.env dosyası oluştur:**
+3. **.env dosyası oluştur:**
 ```bash
 cp .env.example .env
 ```
 
-3. **.env içinde Grok API key'ini ekle:**
+4. **.env dosyasını kontrol et (varsayılan değerler çoğunlukla çalışır):**
 ```
-GROK_API_KEY=xai-your-api-key-here
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=mistral:7b
 PORT=3000
 NODE_ENV=development
+DB_PATH=./data/commits.db
 ```
 
-4. **Sunucuyu başlat:**
+5. **Sunucuyu başlat (Ollama zaten çalışıyorken):**
 ```bash
 npm start
 ```
 
-5. **Tarayıcında aç:**
+6. **Tarayıcında aç:**
 ```
 http://localhost:3000
 ```
@@ -102,28 +112,29 @@ npm test
 **Test Kapsamı:**
 - ✅ Diff parser doğru istatistik hesaplıyor
 - ✅ Message formatter conventional commit standardına uyuyor
-- ✅ Grok API entegrasyon hata yönetimi yapıyor
+- ✅ Ollama API entegrasyon hata yönetimi yapıyor
 - ✅ Commit type detection çalışıyor
 
 ---
 
-## 🤖 AI Model: Grok AI (X.ai)
+## 🤖 AI Model: Ollama + Mistral
 
 ### Model Seçimi
-- **OpenAI uyumlu API** - kolay entegrasyon
-- **Hızlı yanıt** - düşük latency
-- **Fallback modu** - API hatalarında istatistik-bazlı mesaj
+- **Yerel çalışan** - API key veya internet bağlantısı lazım değil
+- **Hızlı yanıt** - 16GB RAM ile 3-5 saniye
+- **Fallback modu** - Ollama kapalı olsa bile istatistik-bazlı mesaj
+- **Ucuz** - Tamamen ücretsiz
 
-### Grok Prompt Engineering
+### Model Parametreleri
 ```
-1. Diff analiz et
-2. Değişikliğin türünü belirle (feat/fix/docs vb.)
-3. Angular convention uygun mesaj oluştur
-4. Yapılandırılmış format döndür (TYPE, MESSAGE, DESCRIPTION)
+Model: mistral:7b
+Boyut: ~8GB RAM
+Hız: ~3-5 saniye (16GB RAM'de)
+Temperature: 0.5 (dengeli yaratıcılık)
 ```
 
 ### Fallback Modu
-API başarısız olursa, diff content'ini analiz ederek otomatik olarak:
+Ollama kapalı veya bağlantı sorunları varsa, diff content'ini analiz ederek otomatik olarak:
 - **Type** belirle (regex pattern matching)
 - **Message** oluştur
 - **Stats** ekle (dosya sayısı, +/- satırlar)
@@ -133,7 +144,7 @@ API başarısız olursa, diff content'ini analiz ederek otomatik olarak:
 ## 🏆 Clean Code & SOLID Prensiplerine Uygunluk
 
 ### Single Responsibility Principle
-- `groqApi.js` - AI API çağrıları ve fallback
+- `ollamaApi.js` - AI API çağrıları ve fallback
 - `diffParser.js` - Sadece diff analiz
 - `msgFormatter.js` - Sadece format işlemleri
 - `database.js` - Sadece DB işlemleri
@@ -172,9 +183,9 @@ CREATE INDEX idx_message_type ON commits(message_type);
 ## 🔍 Karşılaşılan Zorluklar & Çözümler
 
 ### 1. **AI API Entegrasyonları**
-**Problem:** Farklı dil modellerinde yaşanan limit ve entegrasyon problemleri
+**Problem:** Grok API'nin isimler uyumsuzluğu ve entegrasyon problemleri
 
-**Çözüm:** Grok AI (X.ai) OpenAI uyumlu API'ye geçildi
+**Çözüm:** Ollama yerel modeline geçildi - daha hızlı, güvenilir ve ücretsiz
 
 ### 2. **API Hataları & Fallback**
 **Problem:** API limitler veya hata durumlarında sistemin tamamen başarısız olması

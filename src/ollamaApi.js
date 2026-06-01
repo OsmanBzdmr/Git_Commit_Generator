@@ -1,13 +1,9 @@
 const axios = require('axios');
 
-const grokApi = {
+const ollamaApi = {
   async generateCommitMessage(diffContent) {
-    const apiKey = process.env.GROK_API_KEY;
-    
-    if (!apiKey) {
-      console.warn('GROK_API_KEY not found, using fallback mode');
-      return generateFallbackMessage(diffContent);
-    }
+    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    const model = process.env.OLLAMA_MODEL || 'mistral:7b';
 
     const prompt = `You are a Git commit message expert. Analyze this git diff and generate a concise, professional commit message following the Angular convention.
 
@@ -29,38 +25,32 @@ BODY: [Optional details about the change]`;
 
     try {
       const response = await axios.post(
-        'https://api.x.ai/v1/chat/completions',
+        `${ollamaUrl}/api/generate`,
         {
-          model: 'grok-beta',
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.5,
-          max_tokens: 200
+          model: model,
+          prompt: prompt,
+          stream: false,
+          temperature: 0.5
         },
         {
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 8000
+          timeout: 30000
         }
       );
 
-      const content = response.data.choices[0].message.content;
-      return parseGrokResponse(content);
+      const content = response.data.response;
+      return parseOllamaResponse(content);
     } catch (error) {
-      console.error('Grok API Error:', error.response?.data?.error || error.message);
+      console.error('Ollama API Error:', error.message);
+      if (error.code === 'ECONNREFUSED') {
+        console.error('❌ Ollama is not running. Start it with: ollama serve');
+      }
       // Fallback to smart analysis
       return generateFallbackMessage(diffContent);
     }
   }
 };
 
-function parseGrokResponse(content) {
+function parseOllamaResponse(content) {
   const typeMatch = content.match(/TYPE:\s*(\w+)/i);
   const messageMatch = content.match(/MESSAGE:\s*(.+?)(?:\n|$)/i);
   const bodyMatch = content.match(/BODY:\s*(.+?)(?:\n|$)/i);
@@ -111,4 +101,4 @@ function generateFallbackMessage(diff) {
   };
 }
 
-module.exports = grokApi;
+module.exports = ollamaApi;

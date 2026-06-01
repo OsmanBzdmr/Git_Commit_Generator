@@ -1,5 +1,5 @@
 require('dotenv').config();
-const grokApi = require('../src/groqApi');
+const ollamaApi = require('../src/ollamaApi');
 const diffParser = require('../src/diffParser');
 const msgFormatter = require('../src/msgFormatter');
 
@@ -57,22 +57,20 @@ index 123..456 100644
     });
   });
 
-  describe('Grok API Integration', () => {
+  describe('Ollama API Integration', () => {
     test('should have generateCommitMessage method', () => {
-      expect(typeof grokApi.generateCommitMessage).toBe('function');
+      expect(typeof ollamaApi.generateCommitMessage).toBe('function');
     });
 
-    test('should require API key', async () => {
-      const originalKey = process.env.GROK_API_KEY;
-      delete process.env.GROK_API_KEY;
-
+    test('should handle Ollama connection gracefully', async () => {
       try {
-        await grokApi.generateCommitMessage('test diff');
+        const result = await ollamaApi.generateCommitMessage('test diff');
+        expect(result).toHaveProperty('type');
+        expect(result).toHaveProperty('message');
       } catch (error) {
-        expect(error.message).toContain('GROK_API_KEY');
+        // Ollama might not be running in test env
+        expect(error).toBeDefined();
       }
-
-      process.env.GROK_API_KEY = originalKey;
     });
   });
 });
