@@ -59,9 +59,9 @@ BODY: [Optional details about the change]`;
     } catch (error) {
       console.error('Groq API Error:', error.message);
 
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+      if (/401|Unauthorized/i.test(error.message)) {
         console.error('Geçersiz API anahtarı.');
-      } else if (error.message.includes('429') || error.message.includes('rate')) {
+      } else if (/429|rate/i.test(error.message)) {
         console.error('Rate limit aşıldı.');
       }
 
@@ -73,7 +73,7 @@ BODY: [Optional details about the change]`;
 function parseAIResponse(content) {
   const typeMatch = content.match(/TYPE:\s*(\w+)/i);
   const messageMatch = content.match(/MESSAGE:\s*(.+?)(?:\n|$)/i);
-  const bodyMatch = content.match(/BODY:\s*(.+?)(?:\n|$)/i);
+  const bodyMatch = content.match(/BODY:\s*([\s\S]*?)(?=\n\w+:|$)/i);
 
   return {
     type: typeMatch ? typeMatch[1].toLowerCase() : 'chore',

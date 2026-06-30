@@ -48,7 +48,14 @@ function displayResult(data) {
   document.getElementById('msgType').textContent = data.type.toUpperCase();
   
   document.getElementById('msgTitle').textContent = data.message;
-  document.getElementById('msgDescription').textContent = data.description || '(Açıklama yok)';
+  const descriptionRow = document.getElementById('descriptionRow');
+  const msgDescription = document.getElementById('msgDescription');
+  if (data.description) {
+    msgDescription.textContent = data.description;
+    descriptionRow.style.display = 'flex';
+  } else {
+    descriptionRow.style.display = 'none';
+  }
   document.getElementById('formattedMsg').textContent = data.formatted;
   
   document.getElementById('statFiles').textContent = data.stats.filesChanged;
@@ -62,10 +69,10 @@ function displayResult(data) {
   const copyBtn = document.getElementById('copyBtn');
   copyBtn.onclick = () => {
     navigator.clipboard.writeText(data.formatted);
-    const originalText = copyBtn.textContent;
+    copyBtn.dataset.originalText = copyBtn.dataset.originalText || '📋 Kopyala';
     copyBtn.textContent = '✅ Kopyalandı!';
     setTimeout(() => {
-      copyBtn.textContent = originalText;
+      copyBtn.textContent = copyBtn.dataset.originalText;
     }, 2000);
   };
 }

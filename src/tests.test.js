@@ -1,7 +1,7 @@
 require('dotenv').config();
 const groqApi = require('../src/groqApi');
 const diffParser = require('../src/diffParser');
-const msgFormatter = require('../src/msgFormatter');
+const { format } = require('../src/msgFormatter');
 
 describe('Git Commit Message Generator', () => {
 
@@ -31,7 +31,7 @@ index 123..456 100644
 
   describe('Message Formatter', () => {
     test('should format commit message correctly', () => {
-      const formatted = msgFormatter.format(
+      const formatted = format(
         'feat',
         'Add new feature',
         'This is a new feature'
@@ -40,16 +40,8 @@ index 123..456 100644
       expect(formatted).toContain('Add new feature');
     });
 
-    test('should validate conventional commit format', () => {
-      const valid = 'feat: Add feature';
-      const invalid = 'some random message';
-
-      expect(msgFormatter.validate(valid)).toBe(true);
-      expect(msgFormatter.validate(invalid)).toBe(false);
-    });
-
     test('should use default type if invalid', () => {
-      const formatted = msgFormatter.format('invalid-type', 'Message');
+      const formatted = format('invalid-type', 'Message');
       expect(formatted).toContain('feat:');
     });
   });

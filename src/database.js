@@ -42,7 +42,10 @@ const saveCommit = (diffInput, generatedMessage, messageType, stats = {}) => {
     messageType,
     stats.filesChanged || 0,
     stats.additions || 0,
-    stats.deletions || 0
+    stats.deletions || 0,
+    (err) => {
+      if (err) console.error('Commit kaydedilemedi:', err.message);
+    }
   );
 
   stmt.finalize();

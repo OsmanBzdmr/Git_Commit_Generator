@@ -8,17 +8,15 @@ const diffParser = {
       files: []
     };
 
-    let currentFile = null;
-
     for (const line of lines) {
       // Track file changes
-      if (line.startsWith('diff --git') || line.startsWith('+++')) {
-        if (line.startsWith('+++')) {
-          const fileName = line.replace('+++', '').trim();
-          if (fileName && fileName !== 'b/dev/null') {
-            currentFile = fileName.replace('b/', '');
+      if (line.startsWith('diff --git')) {
+        const match = line.match(/diff --git a\/(.*?) b\/(.*?)$/);
+        if (match) {
+          const fileName = match[2];
+          if (fileName && fileName !== '/dev/null') {
             stats.filesChanged++;
-            stats.files.push(currentFile);
+            stats.files.push(fileName);
           }
         }
       }

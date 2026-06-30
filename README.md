@@ -148,8 +148,7 @@ CREATE TABLE commits (
   files_changed INTEGER DEFAULT 0,
   additions INTEGER DEFAULT 0,
   deletions INTEGER DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_created_at ON commits(created_at DESC);

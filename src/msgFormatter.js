@@ -11,13 +11,4 @@ function format(type, message, description) {
   return fullMessage;
 }
 
-function validate(message) {
-  const parts = message.split('\n')[0];
-  const [typeSection] = parts.split(':');
-
-  if (!typeSection) return false;
-
-  return VALID_TYPES.some(t => typeSection.includes(t));
-}
-
-module.exports = { format, validate };
+module.exports = { format };
