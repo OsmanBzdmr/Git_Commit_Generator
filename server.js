@@ -6,20 +6,16 @@ const apiRoutes = require('./routes/api');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 app.use(express.static('public'));
 
-// API Routes
 app.use(apiRoutes);
 
-// Root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
@@ -28,7 +24,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
@@ -38,8 +33,7 @@ app.listen(PORT, () => {
 ╔════════════════════════════════════════════════════════╗
 ║   🚀 Git Commit Mesajı Generator başlatıldı!          ║
 ║   📍 http://localhost:${PORT}                             ║
-║   🤖 Ollama: ${process.env.OLLAMA_URL || 'http://localhost:11434'}                          ║
-║   📦 Model: ${process.env.OLLAMA_MODEL || 'mistral:7b'}                        ║
+║   🤖 Groq AI: ${process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'}     ║
 ╚════════════════════════════════════════════════════════╝
   `);
 });

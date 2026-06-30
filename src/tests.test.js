@@ -1,10 +1,10 @@
 require('dotenv').config();
-const ollamaApi = require('../src/ollamaApi');
+const groqApi = require('../src/groqApi');
 const diffParser = require('../src/diffParser');
 const msgFormatter = require('../src/msgFormatter');
 
 describe('Git Commit Message Generator', () => {
-  
+
   describe('Diff Parser', () => {
     test('should parse diff stats correctly', () => {
       const diff = `diff --git a/test.js b/test.js
@@ -31,7 +31,7 @@ index 123..456 100644
 
   describe('Message Formatter', () => {
     test('should format commit message correctly', () => {
-      const formatted = msgFormatter.formatCommitMessage(
+      const formatted = msgFormatter.format(
         'feat',
         'Add new feature',
         'This is a new feature'
@@ -43,34 +43,31 @@ index 123..456 100644
     test('should validate conventional commit format', () => {
       const valid = 'feat: Add feature';
       const invalid = 'some random message';
-      
+
       expect(msgFormatter.validate(valid)).toBe(true);
       expect(msgFormatter.validate(invalid)).toBe(false);
     });
 
     test('should use default type if invalid', () => {
-      const formatted = msgFormatter.formatCommitMessage(
-        'invalid-type',
-        'Message'
-      );
+      const formatted = msgFormatter.format('invalid-type', 'Message');
       expect(formatted).toContain('feat:');
     });
   });
 
-  describe('Ollama API Integration', () => {
+  describe('Groq API Integration', () => {
     test('should have generateCommitMessage method', () => {
-      expect(typeof ollamaApi.generateCommitMessage).toBe('function');
+      expect(typeof groqApi.generateCommitMessage).toBe('function');
     });
 
-    test('should handle Ollama connection gracefully', async () => {
-      try {
-        const result = await ollamaApi.generateCommitMessage('test diff');
-        expect(result).toHaveProperty('type');
-        expect(result).toHaveProperty('message');
-      } catch (error) {
-        // Ollama might not be running in test env
-        expect(error).toBeDefined();
-      }
+    test('should fallback when no API key is set', async () => {
+      const originalKey = process.env.GROQ_API_KEY;
+      delete process.env.GROQ_API_KEY;
+
+      const result = await groqApi.generateCommitMessage('test diff');
+      expect(result).toHaveProperty('type');
+      expect(result).toHaveProperty('message');
+
+      process.env.GROQ_API_KEY = originalKey;
     });
   });
 });
