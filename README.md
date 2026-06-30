@@ -112,7 +112,6 @@ npm test
 
 ### Model Seçimi
 - **Llama 3.3 70B** - yüksek kaliteli çıktı, çok hızlı inference
-- **Ücretsiz kota** - günde 14.400 istek, kart gerekmez
 - **Fallback modu** - API hatası olsa bile istatistik-bazlı mesaj
 
 ### Fallback Modu
