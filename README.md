@@ -37,14 +37,10 @@ commit-msg-generator/
 │   ├── index.html          # Web arayüzü
 │   ├── style.css           # Stiller
 │   └── script.js           # İstemci taraflı JavaScript
-├── specs/
-│   └── spec.md             # Proje spesifikasyon dokümanı
 ├── db/
 │   └── schema.sql          # Database şeması
 ├── data/
 │   └── commits.db          # SQLite database dosyası (runtime)
-├── .opencode/
-│   └── plans/              # Skill-driven development planları
 ├── server.js               # Express sunucusu
 ├── package.json            # Proje bağımlılıkları
 ├── .env.example            # Ortam değişkenleri şablonu
