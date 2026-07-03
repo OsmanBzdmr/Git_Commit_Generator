@@ -69,7 +69,7 @@ commit-msg-generator/
 
 1. **Depoyu klonla ve bağımlılıkları yükle:**
 ```bash
-cd commit-msg-generator
+cd Git_Commit_Generator
 npm install
 ```
 

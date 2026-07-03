@@ -16,3 +16,6 @@ coverage/
 *.db-wal
 *.db-shm
 data-test/
+.opencode/
+AGENTS.md
+specs/
