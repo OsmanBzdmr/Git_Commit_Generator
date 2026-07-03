@@ -12,3 +12,7 @@ data/
 coverage/
 .sqlite
 *.db
+*.db-journal
+*.db-wal
+*.db-shm
+data-test/

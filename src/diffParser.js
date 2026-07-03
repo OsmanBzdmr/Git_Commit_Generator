@@ -1,5 +1,8 @@
 const diffParser = {
   parseDiff(diffContent) {
+    if (!diffContent) {
+      return { filesChanged: 0, additions: 0, deletions: 0, files: [] };
+    }
     const lines = diffContent.split('\n');
     const stats = {
       filesChanged: 0,
@@ -33,6 +36,7 @@ const diffParser = {
   },
 
   detectChangeType(diffContent) {
+    if (!diffContent) return null;
     const lower = diffContent.toLowerCase();
 
     // Detect type based on content patterns

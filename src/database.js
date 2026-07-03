@@ -30,25 +30,33 @@ const initializeSchema = () => {
 
 const getCommitHistory = promisify(db.all.bind(db, 'SELECT * FROM commits ORDER BY created_at DESC LIMIT 50'));
 
-const saveCommit = (diffInput, generatedMessage, messageType, stats = {}) => {
-  const stmt = db.prepare(`
-    INSERT INTO commits (diff_input, generated_message, message_type, files_changed, additions, deletions)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
+const saveCommit = (diffInput, generatedMessage, messageType, stats) => {
+  const safeStats = stats || {};
+  return new Promise((resolve, reject) => {
+    const stmt = db.prepare(`
+      INSERT INTO commits (diff_input, generated_message, message_type, files_changed, additions, deletions)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
 
-  stmt.run(
-    diffInput,
-    generatedMessage,
-    messageType,
-    stats.filesChanged || 0,
-    stats.additions || 0,
-    stats.deletions || 0,
-    (err) => {
-      if (err) console.error('Commit kaydedilemedi:', err.message);
-    }
-  );
+    stmt.run(
+      diffInput,
+      generatedMessage,
+      messageType,
+      safeStats.filesChanged || 0,
+      safeStats.additions || 0,
+      safeStats.deletions || 0,
+      (err) => {
+        if (err) {
+          console.error('Commit kaydedilemedi:', err.message);
+          reject(err);
+        } else {
+          resolve();
+        }
+      }
+    );
 
-  stmt.finalize();
+    stmt.finalize();
+  });
 };
 
 module.exports = {

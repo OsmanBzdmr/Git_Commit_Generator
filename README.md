@@ -21,25 +21,34 @@ Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI taraf
 ```
 commit-msg-generator/
 ├── src/
-│   ├── groqApi.js        # Groq AI entegrasyon + fallback
-│   ├── diffParser.js     # Git diff parsing ve analiz
-│   ├── msgFormatter.js   # Commit mesajı formatı
-│   ├── database.js       # SQLite database işlemleri
-│   └── tests.test.js     # Jest test dosyası
+│   ├── groqApi.js          # Groq AI entegrasyonu
+│   ├── fallbackGenerator.js # API hatası durumunda fallback mesaj üretici
+│   ├── diffParser.js       # Git diff parsing ve analiz
+│   ├── msgFormatter.js     # Commit mesajı formatı
+│   └── database.js         # SQLite database işlemleri
+├── tests/
+│   ├── diffParser.test.js  # Diff ayrıştırıcı testleri
+│   ├── msgFormatter.test.js# Formatlayıcı testleri
+│   ├── groqApi.test.js     # Groq API + fallback testleri
+│   └── database.test.js    # Veritabanı testleri
 ├── routes/
-│   └── api.js            # Express API endpoints
+│   └── api.js              # Express API endpoints
 ├── public/
-│   ├── index.html        # Web arayüzü
-│   ├── style.css         # Stiller
-│   └── script.js         # İstemci taraflı JavaScript
+│   ├── index.html          # Web arayüzü
+│   ├── style.css           # Stiller
+│   └── script.js           # İstemci taraflı JavaScript
+├── specs/
+│   └── spec.md             # Proje spesifikasyon dokümanı
 ├── db/
-│   └── schema.sql        # Database şeması
+│   └── schema.sql          # Database şeması
 ├── data/
-│   └── commits.db        # SQLite database dosyası (runtime)
-├── server.js             # Express sunucusu
-├── package.json          # Proje bağımlılıkları
-├── .env.example          # Ortam değişkenleri şablonu
-└── README.md            # Bu dosya
+│   └── commits.db          # SQLite database dosyası (runtime)
+├── .opencode/
+│   └── plans/              # Skill-driven development planları
+├── server.js               # Express sunucusu
+├── package.json            # Proje bağımlılıkları
+├── .env.example            # Ortam değişkenleri şablonu
+└── README.md               # Bu dosya
 ```
 
 ### Teknoloji Stack
@@ -100,11 +109,23 @@ Jest ile unit testleri çalıştır:
 npm test
 ```
 
-**Test Kapsamı:**
-- ✅ Diff parser doğru istatistik hesaplıyor
-- ✅ Message formatter conventional commit standardına uyuyor
-- ✅ Groq API entegrasyon hata yönetimi yapıyor
-- ✅ Commit type detection çalışıyor
+**Test Kapsamı (76 test, 4 suite):**
+
+| Modül | Coverage | Test Sayısı |
+|-------|:--------:|:-----------:|
+| `diffParser.js` | %100 | 30 |
+| `msgFormatter.js` | %100 | 20 |
+| `groqApi.js` | %100 | 19 |
+| `fallbackGenerator.js` | %100 | — |
+| `database.js` | %83 | 7 |
+| **Toplam** | **%96** | **76** |
+
+**Kapsanan Alanlar:**
+- ✅ Diff parser: boş/null/undefined girdi, çoklu dosya, ekleme/silme sayma, tip tespiti
+- ✅ Message formatter: tüm tipler, geçersiz tipler, boş açıklama, çok satırlı body
+- ✅ Groq API: mock fetch ile başarılı/hatalı yanıtlar, rate-limit, 401, network hatası
+- ✅ Fallback: tüm type detection pattern'leri (feat, fix, docs, refactor, test, chore, style, perf)
+- ✅ Database: kaydetme, sorgulama, null/undefined stats koruması
 
 ---
 
@@ -120,12 +141,15 @@ Groq API hatası veya anahtar bulunamazsa, diff content'ini analiz ederek otomat
 - **Message** oluşturur
 - **Stats** ekler (dosya sayısı, +/- satırlar)
 
+Fallback motoru `src/fallbackGenerator.js`'de bağımsız bir modül olarak çalışır.
+
 ---
 
 ## SOLID Prensiplerine Uygunluk
 
 ### Single Responsibility Principle
-- `groqApi.js` - AI API çağrıları ve fallback
+- `groqApi.js` - AI API çağrıları (yalnızca)
+- `fallbackGenerator.js` - Fallback mesaj üretimi (yalnızca)
 - `diffParser.js` - Sadece diff analiz
 - `msgFormatter.js` - Sadece format işlemleri
 - `database.js` - Sadece DB işlemleri

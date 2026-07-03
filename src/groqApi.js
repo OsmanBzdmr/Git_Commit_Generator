@@ -1,3 +1,5 @@
+const { generateFallbackMessage } = require('./fallbackGenerator');
+
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 const groqApi = {
@@ -79,42 +81,6 @@ function parseAIResponse(content) {
     type: typeMatch ? typeMatch[1].toLowerCase() : 'chore',
     message: messageMatch ? messageMatch[1].trim() : 'Update code',
     description: bodyMatch ? bodyMatch[1].trim() : ''
-  };
-}
-
-function generateFallbackMessage(diff) {
-  const lower = diff.toLowerCase();
-
-  let type = 'chore';
-  if (/\btest\b|spec|\.test\.|\.spec\./.test(diff)) type = 'test';
-  else if (/doc|readme|comment|\.md|documentation/.test(lower)) type = 'docs';
-  else if (/refactor|reorganize|simplify|cleanup|rewrite/.test(lower)) type = 'refactor';
-  else if (/style|format|whitespace|indent|prettier|lint/.test(lower)) type = 'style';
-  else if (/perf|optim|cache|speed|fast|slow/.test(lower)) type = 'perf';
-  else if (/bug|fix|error|issue|resolve|patch|broken/.test(lower)) type = 'fix';
-  else if (/feature|add|new|implement|create|support/.test(lower)) type = 'feat';
-
-  const fileCount = (diff.match(/^diff --git/gm) || []).length || 1;
-  const additions = (diff.match(/^\+[^+]/gm) || []).length;
-  const deletions = (diff.match(/^-[^-]/gm) || []).length;
-
-  const messages = {
-    feat: 'Implement new feature',
-    fix: 'Resolve issue',
-    docs: 'Update documentation',
-    test: 'Add test coverage',
-    refactor: 'Restructure code',
-    style: 'Improve code formatting',
-    perf: 'Optimize performance',
-    chore: 'Maintenance update'
-  };
-
-  return {
-    type,
-    message: messages[type] || 'Update code',
-    description: fileCount > 1
-      ? `Changes across ${fileCount} files: +${additions} -${deletions} lines`
-      : `${additions > deletions ? 'Added' : 'Modified'} functionality: +${additions} -${deletions} lines`
   };
 }
 
