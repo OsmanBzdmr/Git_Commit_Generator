@@ -123,6 +123,25 @@ git diff | git-commit-gen
 git diff | node cli.js
 ```
 
+### Kullanım Modları
+
+| Bayrak | Kısa | Açıklama |
+|--------|------|----------|
+| _(bayraksız)_ | — | Pipe ile diff alır, mesaj oluşturur, panoya kopyalar |
+| `--commit` | `-c` | Tüm değişiklikleri stage'ler, mesaj oluşturur, commit yapar |
+| `--all` | `-a` | Stage + commit + push (upstream otomatik ayarlanır) |
+
+```bash
+# Sadece mesaj oluştur (pipe ile)
+git diff | node cli.js
+
+# Stage et + commit yap
+node cli.js --commit
+
+# Stage et + commit + push yap
+node cli.js --all
+```
+
 ### Örnek Çıktı
 
 ```
@@ -133,6 +152,80 @@ Introduced a variable to store user input from the console, enhancing the hello 
 ```
 
 Commit mesajı hem terminale yazdırılır hem de otomatik olarak panoya kopyalanır.
+
+### Fallback Modu
+
+`.env`'de `GROQ_API_KEY` tanımlı değilse veya API hatası alınırsa **fallback modu** devreye girer:
+- Diff içeriğini regex ile analiz eder
+- İstatistik-bazlı mesaj üretir (dosya sayısı, ekleme/silme)
+- Hiçbir ek konfigürasyon gerektirmez
+
+---
+
+## API Kullanımı
+
+Sunucu çalışırken REST API üzerinden de kullanabilirsin.
+
+### `POST /api/generate-message`
+
+```bash
+curl -X POST http://localhost:3000/api/generate-message \
+  -H "Content-Type: application/json" \
+  -d '{"diff": "diff --git a/src/app.js b/src/app.js\n+ new feature"}'
+```
+
+**Yanıt:**
+```json
+{
+  "success": true,
+  "type": "feat",
+  "message": "Add user feature",
+  "description": "Implement new feature in app.js",
+  "formatted": "feat: Add user feature\n\nImplement new feature in app.js",
+  "stats": { "files": 1, "additions": 1, "deletions": 0 }
+}
+```
+
+### `GET /api/history`
+
+Son 5 commit kaydını getirir.
+
+### `GET /api/health`
+
+```bash
+curl http://localhost:3000/api/health
+# {"status":"ok","message":"Git Commit Generator is running"}
+```
+
+---
+
+## Web Arayüzü
+
+Tarayıcıda `http://localhost:3000` adresine girerek kullanabilirsin.
+
+**Özellikler:**
+- **Diff girişi** — textarea'ya diff yapıştır, `✨ Generate Commit Message` butonuna bas
+- **Sonuç paneli** — type badge'i, subject, description, tam formatlı mesaj
+- **Diff istatistikleri** — dosya sayısı, ekleme/silme adetleri
+- **Commit geçmişi** — 📜 ikonuna tıklayarak son 5 kaydı görüntüle
+- **Tema değiştirme** — 🌙 ikonu ile karanlık/aydınlık tema geçişi
+- **Panoya kopyalama** — 📋 butonu ile tek tıkla kopyala
+
+---
+
+## Conventional Commits Türleri
+
+| Tür | Açıklama |
+|-----|----------|
+| `feat` | Yeni özellik |
+| `fix` | Hata düzeltmesi |
+| `docs` | Dokümantasyon değişikliği |
+| `refactor` | Kod iyileştirmesi (yeni özellik yok) |
+| `test` | Test ekleme/düzeltme |
+| `chore` | Bakım görevleri |
+| `style` | Kod stili düzenlemesi |
+| `perf` | Performans iyileştirmesi |
+
 ---
 
 ## Testing
