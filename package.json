@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "AI-powered Git commit message generator using Groq API",
   "main": "server.js",
+  "bin": {
+    "git-commit-gen": "./cli.js"
+  },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",

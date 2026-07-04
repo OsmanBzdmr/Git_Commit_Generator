@@ -12,6 +12,7 @@ Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI taraf
 - 💾 **SQLite database** - tüm oluşturulan mesajların geçmişi
 - 🎨 **Modern web arayüzü** - kullanıcı dostu, responsive design
 - 📜 **Geçmiş görüntüleme** - son oluşturulan 5 commit mesajı
+- 🖥️ **CLI aracı** - `git diff | git-commit-gen` ile terminalden kullanım
 
 ---
 
@@ -41,6 +42,7 @@ commit-msg-generator/
 │   └── schema.sql          # Database şeması
 ├── data/
 │   └── commits.db          # SQLite database dosyası (runtime)
+├── cli.js                  # CLI aracı (pipe ile kullanım)
 ├── server.js               # Express sunucusu
 ├── package.json            # Proje bağımlılıkları
 ├── .env.example            # Ortam değişkenleri şablonu
@@ -95,6 +97,41 @@ npm start
 ```
 http://localhost:3000
 ```
+
+---
+
+## CLI Kullanımı
+
+Web arayüzüne alternatif olarak terminalden doğrudan kullanabilirsin.
+
+### Global Kurulum
+
+```bash
+npm link
+```
+
+Ardından herhangi bir git projesinde:
+
+```bash
+git diff | git-commit-gen
+```
+
+### Global Kurulum Olmadan
+
+```bash
+git diff | node cli.js
+```
+
+### Örnek Çıktı
+
+```
+feat: Add user input
+
+Introduced a variable to store user input from the console, enhancing the hello function's functionality.
+(panoya kopyalandi)
+```
+
+Commit mesajı hem terminale yazdırılır hem de otomatik olarak panoya kopyalanır.
 ---
 
 ## Testing
