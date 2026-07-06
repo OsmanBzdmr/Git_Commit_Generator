@@ -185,3 +185,5 @@ CREATE TABLE commits (
 CREATE INDEX idx_created_at ON commits(created_at DESC);
 CREATE INDEX idx_message_type ON commits(message_type);
 ```
+
+> 🧠 *Bu proje, yapay zeka araçlarından faydalanılarak geliştirilmiştir.*
