@@ -146,10 +146,4 @@ npm test
 | `database.js` | %83 | 7 |
 | **Toplam** | **%96** | **76** |
 
----
-
-## Veritabanı Şeması
-
-Şema dosyası: [`db/schema.sql`](db/schema.sql)
-
 > 🧠 *Bu proje, yapay zeka araçlarından faydalanılarak geliştirilmiştir.*
