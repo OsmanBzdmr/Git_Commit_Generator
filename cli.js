@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 const groqApi = require('./src/groqApi');
 const msgFormatter = require('./src/msgFormatter');
 const diffParser = require('./src/diffParser');
