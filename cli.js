@@ -122,7 +122,22 @@ async function main() {
     const os = require('os');
     const tmp = path.join(os.tmpdir(), 'gc-' + Date.now() + '.txt');
     fs.writeFileSync(tmp, formatted, 'utf8');
-    execSync('powershell -c "Get-Content \"' + tmp + '\" | Set-Clipboard"', { stdio: 'pipe' });
+    switch (process.platform) {
+      case 'win32':
+        execSync(`powershell -c "Get-Content '${tmp}' | Set-Clipboard"`, { stdio: 'pipe' });
+        break;
+      case 'linux':
+        try {
+          execSync(`clip.exe < "${tmp}"`, { stdio: 'pipe' });
+        } catch {
+          try {
+            execSync(`wl-copy < "${tmp}"`, { stdio: 'pipe' });
+          } catch {
+            execSync(`xclip -selection clipboard < "${tmp}"`, { stdio: 'pipe' });
+          }
+        }
+        break;
+    }
     fs.unlinkSync(tmp);
     process.stderr.write('(panoya kopyalandi)\n');
   } catch {}

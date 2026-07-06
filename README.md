@@ -11,7 +11,7 @@ Git diff çıktısını analiz ederek **AI tarafından otomatik olarak standart 
 - 📊 **Git diff analizi** - dosya sayısı, eklemeler, silmeler istatistikleri
 - 💾 **SQLite database** - tüm oluşturulan mesajların geçmişi
 - 📜 **Geçmiş görüntüleme** - `--history` ile son 50 commit mesajı
-- 📋 **Otomatik pano kopyalama**
+- 📋 **Cross-platform clipboard** (Windows + Linux)
 - 🚀 **Git entegrasyonu** - `--commit` ile stage+commit, `--all` ile stage+commit+push
 
 ---
