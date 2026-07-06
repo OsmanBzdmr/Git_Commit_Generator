@@ -2,7 +2,7 @@
 
 ## Proje Özeti
 
-Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI tarafından otomatik olarak standart format commit mesajları** oluşturmasını sağlayan web uygulaması.
+Git diff çıktısını analiz ederek **AI tarafından otomatik olarak standart format commit mesajları** oluşturan CLI aracı.
 
 ### Temel Özellikler
 - 🤖 **Groq AI** ile hızlı AI-powered commit mesajı oluşturma
@@ -10,9 +10,9 @@ Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI taraf
 - 🏷️ **Conventional Commits** standardına uygun (feat, fix, docs, refactor, test, chore, style, perf)
 - 📊 **Git diff analizi** - dosya sayısı, eklemeler, silmeler istatistikleri
 - 💾 **SQLite database** - tüm oluşturulan mesajların geçmişi
-- 🎨 **Modern web arayüzü** - kullanıcı dostu, responsive design
-- 📜 **Geçmiş görüntüleme** - son oluşturulan 5 commit mesajı
-- 🖥️ **CLI aracı** - `git diff | git-commit-gen` ile terminalden kullanım
+- 📜 **Geçmiş görüntüleme** - `--history` ile son 50 commit mesajı
+- 📋 **Otomatik pano kopyalama**
+- 🚀 **Git entegrasyonu** - `--commit` ile stage+commit, `--all` ile stage+commit+push
 
 ---
 
@@ -22,88 +22,50 @@ Yazılımcıların kod değişikliklerini (Git diff) yapıştırarak, **AI taraf
 ```
 commit-msg-generator/
 ├── src/
-│   ├── groqApi.js          # Groq AI entegrasyonu
-│   ├── fallbackGenerator.js # API hatası durumunda fallback mesaj üretici
-│   ├── diffParser.js       # Git diff parsing ve analiz
-│   ├── msgFormatter.js     # Commit mesajı formatı
-│   └── database.js         # SQLite database işlemleri
+│   ├── groqApi.js            # Groq AI entegrasyonu
+│   ├── fallbackGenerator.js  # API hatası durumunda fallback mesaj üretici
+│   ├── diffParser.js         # Git diff parsing ve analiz
+│   ├── msgFormatter.js       # Commit mesajı formatı
+│   └── database.js           # SQLite database işlemleri
 ├── tests/
-│   ├── diffParser.test.js  # Diff ayrıştırıcı testleri
-│   ├── msgFormatter.test.js# Formatlayıcı testleri
-│   ├── groqApi.test.js     # Groq API + fallback testleri
-│   └── database.test.js    # Veritabanı testleri
-├── routes/
-│   └── api.js              # Express API endpoints
-├── public/
-│   ├── index.html          # Web arayüzü
-│   ├── style.css           # Stiller
-│   └── script.js           # İstemci taraflı JavaScript
+│   ├── diffParser.test.js    # Diff ayrıştırıcı testleri
+│   ├── msgFormatter.test.js  # Formatlayıcı testleri
+│   ├── groqApi.test.js       # Groq API + fallback testleri
+│   └── database.test.js      # Veritabanı testleri
 ├── db/
-│   └── schema.sql          # Database şeması
+│   └── schema.sql            # Database şeması
 ├── data/
-│   └── commits.db          # SQLite database dosyası (runtime)
-├── cli.js                  # CLI aracı (pipe ile kullanım)
-├── server.js               # Express sunucusu
-├── package.json            # Proje bağımlılıkları
-├── .env.example            # Ortam değişkenleri şablonu
-└── README.md               # Bu dosya
+│   └── commits.db            # SQLite database dosyası (runtime)
+├── cli.js                    # CLI aracı
+├── package.json              # Proje bağımlılıkları
+├── .env.example              # Ortam değişkenleri şablonu
+└── README.md                 # Bu dosya
 ```
 
 ### Teknoloji Stack
 
 | Layer | Teknoloji |
 |-------|-----------|
-| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
-| **Backend** | Node.js, Express.js |
+| **Runtime** | Node.js |
 | **Database** | SQLite3 |
 | **AI Model** | Groq (Llama 3.3 70B) |
 | **Testing** | Jest |
 
 ---
 
-## Başlangıç
+## Kurulum
 
 ### Gereksinimler
 - Node.js 18+
 - Groq API Anahtarı ([console.groq.com](https://console.groq.com))
 
-### Kurulum
-
-1. **Depoyu klonla ve bağımlılıkları yükle:**
 ```bash
 git clone https://github.com/OsmanBzdmr/Git_Commit_Generator.git
 cd Git_Commit_Generator
 npm install
-```
-
-2. **.env dosyası oluştur:**
-```bash
 cp .env.example .env
+# .env dosyasına GROQ_API_KEY ekle
 ```
-
-3. **.env dosyasına Groq API anahtarını ekle:**
-```
-GROQ_API_KEY=api-anahtarini-buraya-yaz
-GROQ_MODEL=llama-3.3-70b-versatile
-PORT=3000
-NODE_ENV=development
-```
-
-4. **Sunucuyu başlat:**
-```bash
-npm start
-```
-
-5. **Tarayıcında aç:**
-```
-http://localhost:3000
-```
-
----
-
-## CLI Kullanımı
-
-Web arayüzüne alternatif olarak terminalden doğrudan kullanabilirsin.
 
 ### Global Kurulum
 
@@ -123,13 +85,16 @@ git diff | git-commit-gen
 git diff | node cli.js
 ```
 
-### Kullanım Modları
+---
+
+## Kullanım
 
 | Bayrak | Kısa | Açıklama |
 |--------|------|----------|
 | _(bayraksız)_ | — | Pipe ile diff alır, mesaj oluşturur, panoya kopyalar |
 | `--commit` | `-c` | Tüm değişiklikleri stage'ler, mesaj oluşturur, commit yapar |
 | `--all` | `-a` | Stage + commit + push (upstream otomatik ayarlanır) |
+| `--history` | `-h` | Son 50 commit kaydını gösterir |
 
 ```bash
 # Sadece mesaj oluştur (pipe ile)
@@ -140,6 +105,9 @@ node cli.js --commit
 
 # Stage et + commit + push yap
 node cli.js --all
+
+# Geçmişi görüntüle
+node cli.js --history
 ```
 
 ### Örnek Çıktı
@@ -153,63 +121,23 @@ Introduced a variable to store user input from the console, enhancing the hello 
 
 Commit mesajı hem terminale yazdırılır hem de otomatik olarak panoya kopyalanır.
 
+### Geçmiş Görüntüleme
+
+```bash
+git-commit-gen --history
+# [6.07.2026 14:30] feat: Add user input
+#   files: 2  +15  -3
+#
+# [6.07.2026 14:25] fix: Fix login validation
+#   files: 1  +5  -2
+```
+
 ### Fallback Modu
 
 `.env`'de `GROQ_API_KEY` tanımlı değilse veya API hatası alınırsa **fallback modu** devreye girer:
 - Diff içeriğini regex ile analiz eder
 - İstatistik-bazlı mesaj üretir (dosya sayısı, ekleme/silme)
 - Hiçbir ek konfigürasyon gerektirmez
-
----
-
-## API Kullanımı
-
-Sunucu çalışırken REST API üzerinden de kullanabilirsin.
-
-### `POST /api/generate-message`
-
-```bash
-curl -X POST http://localhost:3000/api/generate-message \
-  -H "Content-Type: application/json" \
-  -d '{"diff": "diff --git a/src/app.js b/src/app.js\n+ new feature"}'
-```
-
-**Yanıt:**
-```json
-{
-  "success": true,
-  "type": "feat",
-  "message": "Add user feature",
-  "description": "Implement new feature in app.js",
-  "formatted": "feat: Add user feature\n\nImplement new feature in app.js",
-  "stats": { "files": 1, "additions": 1, "deletions": 0 }
-}
-```
-
-### `GET /api/history`
-
-Son 5 commit kaydını getirir.
-
-### `GET /api/health`
-
-```bash
-curl http://localhost:3000/api/health
-# {"status":"ok","message":"Git Commit Generator is running"}
-```
-
----
-
-## Web Arayüzü
-
-Tarayıcıda `http://localhost:3000` adresine girerek kullanabilirsin.
-
-**Özellikler:**
-- **Diff girişi** — textarea'ya diff yapıştır, `✨ Generate Commit Message` butonuna bas
-- **Sonuç paneli** — type badge'i, subject, description, tam formatlı mesaj
-- **Diff istatistikleri** — dosya sayısı, ekleme/silme adetleri
-- **Commit geçmişi** — 📜 ikonuna tıklayarak son 5 kaydı görüntüle
-- **Tema değiştirme** — 🌙 ikonu ile karanlık/aydınlık tema geçişi
-- **Panoya kopyalama** — 📋 butonu ile tek tıkla kopyala
 
 ---
 
@@ -230,8 +158,6 @@ Tarayıcıda `http://localhost:3000` adresine girerek kullanabilirsin.
 
 ## Testing
 
-Jest ile unit testleri çalıştır:
-
 ```bash
 npm test
 ```
@@ -243,48 +169,8 @@ npm test
 | `diffParser.js` | %100 | 30 |
 | `msgFormatter.js` | %100 | 20 |
 | `groqApi.js` | %100 | 19 |
-| `fallbackGenerator.js` | %100 | — |
 | `database.js` | %83 | 7 |
 | **Toplam** | **%96** | **76** |
-
-**Kapsanan Alanlar:**
-- ✅ Diff parser: boş/null/undefined girdi, çoklu dosya, ekleme/silme sayma, tip tespiti
-- ✅ Message formatter: tüm tipler, geçersiz tipler, boş açıklama, çok satırlı body
-- ✅ Groq API: mock fetch ile başarılı/hatalı yanıtlar, rate-limit, 401, network hatası
-- ✅ Fallback: tüm type detection pattern'leri (feat, fix, docs, refactor, test, chore, style, perf)
-- ✅ Database: kaydetme, sorgulama, null/undefined stats koruması
-
----
-
-## AI Model: Groq
-
-### Model Seçimi
-- **Llama 3.3 70B** - yüksek kaliteli çıktı, çok hızlı inference
-- **Fallback modu** - API hatası olsa bile istatistik-bazlı mesaj
-
-### Fallback Modu
-Groq API hatası veya anahtar bulunamazsa, diff content'ini analiz ederek otomatik olarak:
-- **Type** belirler (regex pattern matching)
-- **Message** oluşturur
-- **Stats** ekler (dosya sayısı, +/- satırlar)
-
-Fallback motoru `src/fallbackGenerator.js`'de bağımsız bir modül olarak çalışır.
-
----
-
-## SOLID Prensiplerine Uygunluk
-
-### Single Responsibility Principle
-- `groqApi.js` - AI API çağrıları (yalnızca)
-- `fallbackGenerator.js` - Fallback mesaj üretimi (yalnızca)
-- `diffParser.js` - Sadece diff analiz
-- `msgFormatter.js` - Sadece format işlemleri
-- `database.js` - Sadece DB işlemleri
-
-### Error Handling
-- Try-catch blokları tüm async operasyonlarda
-- Anlamlı hata mesajları
-- Graceful degradation (fallback modu)
 
 ---
 

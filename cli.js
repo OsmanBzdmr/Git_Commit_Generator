@@ -2,10 +2,36 @@
 require('dotenv').config();
 const groqApi = require('./src/groqApi');
 const msgFormatter = require('./src/msgFormatter');
+const diffParser = require('./src/diffParser');
+const { saveCommit, getCommitHistory } = require('./src/database');
 const { execSync } = require('child_process');
 
 function sh(cmd) {
   return execSync(cmd, { stdio: 'pipe', encoding: 'utf8' }).trim();
+}
+
+function printUsage() {
+  console.log(`
+Usage:
+  git diff | git-commit-gen              Generate message from piped diff
+  git-commit-gen --commit, -c            Stage all + commit
+  git-commit-gen --all, -a               Stage all + commit + push
+  git-commit-gen --history, -h           Show commit history
+  git-commit-gen --help                  Show this help
+  `);
+}
+
+async function showHistory() {
+  const commits = await getCommitHistory();
+  if (!commits || commits.length === 0) {
+    console.log('No commit history found.\n');
+    return;
+  }
+  for (const c of commits) {
+    const date = new Date(c.created_at).toLocaleString('tr-TR');
+    console.log(`[${date}] ${c.generated_message}`);
+    console.log(`  files: ${c.files_changed}  +${c.additions}  -${c.deletions}\n`);
+  }
 }
 
 async function getDiffFromGit() {
@@ -22,6 +48,17 @@ async function getDiffFromGit() {
 
 async function main() {
   const args = process.argv.slice(2);
+
+  if (args.includes('--help')) {
+    printUsage();
+    return;
+  }
+
+  if (args.includes('--history') || args.includes('-h')) {
+    await showHistory();
+    return;
+  }
+
   const isAll = args.includes('--all') || args.includes('-a');
   const isCommit = args.includes('--commit') || args.includes('-c');
 
@@ -47,9 +84,7 @@ async function main() {
     }
     diff = Buffer.concat(chunks).toString('utf8');
     if (!diff.trim()) {
-      process.stderr.write('No diff input detected. Pipe git diff output:\n');
-      process.stderr.write('  git diff | git-commit-gen\n');
-      process.stderr.write('  git-commit-gen --all\n');
+      printUsage();
       process.exit(1);
     }
   }
@@ -57,6 +92,9 @@ async function main() {
   const result = await groqApi.generateCommitMessage(diff);
   const formatted = msgFormatter.format(result.type, result.message, result.description);
   console.log(formatted);
+
+  const stats = diffParser.parseDiff(diff);
+  saveCommit(diff, formatted, result.type, stats);
 
   if (isAll || isCommit) {
     process.stderr.write('(committing...)\n');
