@@ -1,134 +1,104 @@
-# Git Commit Mesajı Otomatik Oluşturucu
+# Git Commit Generator
 
 ![Test](https://github.com/OsmanBzdmr/Git_Commit_Generator/actions/workflows/test.yml/badge.svg)
 
-## Proje Özeti
-
-Git diff çıktısını analiz ederek **AI tarafından otomatik olarak standart format commit mesajları** oluşturan CLI aracı.
-
-### Temel Özellikler
-- 🤖 **Groq AI** ile hızlı AI-powered commit mesajı oluşturma
-- 🧠 **Akıllı fallback modu** - API hatası olsa bile istatistik-bazlı mesaj üretimi
-- 🏷️ **Conventional Commits** standardına uygun (feat, fix, docs, refactor, test, chore, style, perf)
-- 📊 **Git diff analizi** - dosya sayısı, eklemeler, silmeler istatistikleri
-- 💾 **SQLite database** - tüm oluşturulan mesajların geçmişi
-- 📜 **Geçmiş görüntüleme** - `--history` ile son 50 commit mesajı
-- 📋 **Cross-platform clipboard** (Windows + Linux)
-- 🚀 **Git entegrasyonu** - `--commit` ile stage+commit, `--all` ile stage+commit+push
+AI-powered CLI tool that analyzes your `git diff` and generates clean, conventional commit messages using Groq (Llama 3.3 70B).
 
 ---
 
-## Mimari Tasarım
+## Features
 
-### Klasör Yapısı
-```
-commit-msg-generator/
-├── src/
-│   ├── groqApi.js            # Groq AI entegrasyonu
-│   ├── fallbackGenerator.js  # API hatası durumunda fallback mesaj üretici
-│   ├── diffParser.js         # Git diff parsing ve analiz
-│   ├── msgFormatter.js       # Commit mesajı formatı
-│   └── database.js           # SQLite database işlemleri
-├── tests/
-│   ├── diffParser.test.js    # Diff ayrıştırıcı testleri
-│   ├── msgFormatter.test.js  # Formatlayıcı testleri
-│   ├── groqApi.test.js       # Groq API + fallback testleri
-│   └── database.test.js      # Veritabanı testleri
-├── db/
-│   └── schema.sql            # Database şeması
-├── data/
-│   └── commits.db            # SQLite database dosyası (runtime)
-├── cli.js                    # CLI aracı
-├── package.json              # Proje bağımlılıkları
-├── .env.example              # Ortam değişkenleri şablonu
-└── README.md                 # Bu dosya
-```
-
-### Teknoloji Stack
-
-| Layer | Teknoloji |
-|-------|-----------|
-| **Runtime** | Node.js |
-| **Database** | SQLite3 |
-| **AI Model** | Groq (Llama 3.3 70B) |
-| **Testing** | Jest |
+- 🤖 **Groq AI** — fast commit message generation via Llama 3.3 70B
+- 🧠 **Fallback mode** — generates stat-based messages when API is unavailable
+- 🏷️ **Conventional Commits** — `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `style`, `perf`
+- 📋 **Cross-platform clipboard** — auto-copies result on Windows and Linux
+- 💾 **Local history** — stores generated messages in SQLite, viewable with `--history`
+- 🚀 **Git integration** — stage, commit, and push in one command
 
 ---
 
-## Kurulum
+## Installation
 
-### Gereksinimler
-- Node.js 18+
-- Groq API Anahtarı ([console.groq.com](https://console.groq.com))
+**Requirements:** Node.js 18+, [Groq API key](https://console.groq.com)
 
 ```bash
 git clone https://github.com/OsmanBzdmr/Git_Commit_Generator.git
 cd Git_Commit_Generator
 npm install
 cp .env.example .env
-# .env dosyasına GROQ_API_KEY ekle
+# Add your GROQ_API_KEY to .env
 ```
 
-### Global Kurulum (Önerilen)
+**Link globally** so you can use it in any repo:
 
 ```bash
 npm link
 ```
 
-Ardından herhangi bir git projesinde:
+---
+
+## Usage
 
 ```bash
+# Generate message from piped diff
 git diff | git-commit-gen
+
+# Stage all + commit
+git-commit-gen --commit
+
+# Stage all + commit + push
+git-commit-gen --all
+
+# View last 50 generated messages
+git-commit-gen --history
+```
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| _(none)_ | — | Reads diff from stdin, prints message, copies to clipboard |
+| `--commit` | `-c` | Stages all changes, generates message, commits |
+| `--all` | `-a` | Stages all changes, commits, and pushes |
+| `--history` | `-h` | Shows last 50 commit messages from local history |
+
+**Example output:**
+
+```
+feat: add user authentication middleware
+
+Introduced JWT validation middleware and attached it to protected routes.
 ```
 
 ---
 
-## Kullanım
+## Fallback Mode
 
-| Bayrak | Kısa | Açıklama |
-|--------|------|----------|
-| _(bayraksız)_ | — | Pipe ile diff alır, mesaj oluşturur, panoya kopyalar |
-| `--commit` | `-c` | Tüm değişiklikleri stage'ler, mesaj oluşturur, commit yapar |
-| `--all` | `-a` | Stage + commit + push (upstream otomatik ayarlanır) |
-| `--history` | `-h` | Son 50 commit kaydını gösterir |
+If `GROQ_API_KEY` is missing or the API call fails, the tool falls back to a local generator that analyzes the diff statistically (file count, additions, deletions) — no extra configuration needed.
 
-```bash
-# Sadece mesaj oluştur (pipe ile)
-git diff | git-commit-gen
+---
 
-# Stage et + commit yap
-git-commit-gen --commit
-
-# Stage et + commit + push yap
-git-commit-gen --all
-
-# Geçmişi görüntüle
-git-commit-gen --history
-```
-
-### Kaldırma
-
-```bash
-npm unlink -g git-commit-gen
-```
-
-### Örnek Çıktı
+## Project Structure
 
 ```
-feat: Add user input
-
-Introduced a variable to store user input from the console, enhancing the hello function's functionality.
-(panoya kopyalandi)
+Git_Commit_Generator/
+├── src/
+│   ├── groqApi.js            # Groq AI integration
+│   ├── fallbackGenerator.js  # Offline fallback message generator
+│   ├── diffParser.js         # Git diff parsing and stats
+│   ├── msgFormatter.js       # Commit message formatting
+│   └── database.js           # SQLite history storage
+├── tests/
+│   ├── diffParser.test.js
+│   ├── msgFormatter.test.js
+│   ├── groqApi.test.js
+│   └── database.test.js
+├── db/
+│   └── schema.sql
+├── cli.js                    # CLI entry point
+├── .env.example
+└── package.json
 ```
 
-Commit mesajı hem terminale yazdırılır hem de otomatik olarak panoya kopyalanır.
-
-### Fallback Modu
-
-`.env`'de `GROQ_API_KEY` tanımlı değilse veya API hatası alınırsa **fallback modu** devreye girer:
-- Diff içeriğini regex ile analiz eder
-- İstatistik-bazlı mesaj üretir (dosya sayısı, ekleme/silme)
-- Hiçbir ek konfigürasyon gerektirmez
+---
 
 ## Testing
 
@@ -136,14 +106,18 @@ Commit mesajı hem terminale yazdırılır hem de otomatik olarak panoya kopyala
 npm test
 ```
 
-**Test Kapsamı (76 test, 4 suite):**
+| Module | Coverage | Tests |
+|--------|:--------:|:-----:|
+| `diffParser.js` | 100% | 30 |
+| `msgFormatter.js` | 100% | 20 |
+| `groqApi.js` | 100% | 19 |
+| `database.js` | 83% | 7 |
+| **Total** | **96%** | **76** |
 
-| Modül | Coverage | Test Sayısı |
-|-------|:--------:|:-----------:|
-| `diffParser.js` | %100 | 30 |
-| `msgFormatter.js` | %100 | 20 |
-| `groqApi.js` | %100 | 19 |
-| `database.js` | %83 | 7 |
-| **Toplam** | **%96** | **76** |
+---
 
-> 🧠 *Bu proje, yapay zeka araçlarından faydalanılarak geliştirilmiştir.*
+## Uninstall
+
+```bash
+npm unlink -g git-commit-gen
+```
