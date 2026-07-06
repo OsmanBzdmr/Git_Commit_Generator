@@ -1,7 +1,7 @@
 {
   "name": "git-commit-msg-generator",
   "version": "1.0.0",
-  "description": "AI-powered Git commit message generator using Groq API",
+  "description": "AI-powered Git commit message generator (CLI)",
   "main": "cli.js",
   "bin": {
     "git-commit-gen": "./cli.js"
@@ -11,9 +11,10 @@
   },
   "keywords": [
     "git",
-    "commit",
-    "ai",
+    "commit-message",
     "groq",
+    "cli",
+    "conventional-commits",
     "automation"
   ],
   "author": "Your Team",
