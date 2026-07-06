@@ -1,5 +1,7 @@
 # Git Commit Mesajı Otomatik Oluşturucu
 
+![Test](https://github.com/OsmanBzdmr/Git_Commit_Generator/actions/workflows/test.yml/badge.svg)
+
 ## Proje Özeti
 
 Git diff çıktısını analiz ederek **AI tarafından otomatik olarak standart format commit mesajları** oluşturan CLI aracı.
