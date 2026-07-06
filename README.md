@@ -106,6 +106,12 @@ git-commit-gen --all
 git-commit-gen --history
 ```
 
+### Kaldırma
+
+```bash
+npm unlink -g git-commit-gen
+```
+
 ### Örnek Çıktı
 
 ```
