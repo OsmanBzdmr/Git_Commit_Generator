@@ -67,7 +67,7 @@ cp .env.example .env
 # .env dosyasına GROQ_API_KEY ekle
 ```
 
-### Global Kurulum
+### Global Kurulum (Önerilen)
 
 ```bash
 npm link
@@ -77,12 +77,6 @@ Ardından herhangi bir git projesinde:
 
 ```bash
 git diff | git-commit-gen
-```
-
-### Global Kurulum Olmadan
-
-```bash
-git diff | node cli.js
 ```
 
 ---
@@ -98,16 +92,16 @@ git diff | node cli.js
 
 ```bash
 # Sadece mesaj oluştur (pipe ile)
-git diff | node cli.js
+git diff | git-commit-gen
 
 # Stage et + commit yap
-node cli.js --commit
+git-commit-gen --commit
 
 # Stage et + commit + push yap
-node cli.js --all
+git-commit-gen --all
 
 # Geçmişi görüntüle
-node cli.js --history
+git-commit-gen --history
 ```
 
 ### Örnek Çıktı
