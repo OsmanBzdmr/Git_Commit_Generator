@@ -123,40 +123,12 @@ Introduced a variable to store user input from the console, enhancing the hello 
 
 Commit mesajı hem terminale yazdırılır hem de otomatik olarak panoya kopyalanır.
 
-### Geçmiş Görüntüleme
-
-```bash
-git-commit-gen --history
-# [6.07.2026 14:30] feat: Add user input
-#   files: 2  +15  -3
-#
-# [6.07.2026 14:25] fix: Fix login validation
-#   files: 1  +5  -2
-```
-
 ### Fallback Modu
 
 `.env`'de `GROQ_API_KEY` tanımlı değilse veya API hatası alınırsa **fallback modu** devreye girer:
 - Diff içeriğini regex ile analiz eder
 - İstatistik-bazlı mesaj üretir (dosya sayısı, ekleme/silme)
 - Hiçbir ek konfigürasyon gerektirmez
-
----
-
-## Conventional Commits Türleri
-
-| Tür | Açıklama |
-|-----|----------|
-| `feat` | Yeni özellik |
-| `fix` | Hata düzeltmesi |
-| `docs` | Dokümantasyon değişikliği |
-| `refactor` | Kod iyileştirmesi (yeni özellik yok) |
-| `test` | Test ekleme/düzeltme |
-| `chore` | Bakım görevleri |
-| `style` | Kod stili düzenlemesi |
-| `perf` | Performans iyileştirmesi |
-
----
 
 ## Testing
 
