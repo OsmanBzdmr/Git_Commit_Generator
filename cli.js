@@ -143,7 +143,11 @@ async function main() {
   } catch {}
 }
 
-main().catch((err) => {
-  process.stderr.write('Error: ' + err.message + '\n');
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    process.stderr.write('Error: ' + err.message + '\n');
+    process.exit(1);
+  });
+}
+
+module.exports = { main, sh, getDiffFromGit, showHistory, printUsage };
