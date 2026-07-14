@@ -4,7 +4,7 @@ const groqApi = require('./src/groqApi');
 const msgFormatter = require('./src/msgFormatter');
 const diffParser = require('./src/diffParser');
 const { saveCommit, getCommitHistory } = require('./src/database');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 
 function sh(cmd) {
   return execSync(cmd, { stdio: 'pipe', encoding: 'utf8' }).trim();
@@ -99,46 +99,46 @@ async function main() {
   if (isAll || isCommit) {
     process.stderr.write('(committing...)\n');
     const parts = formatted.split(/\n\n/);
-    const msgParts = parts.map(p => `-m "${p.replace(/"/g, '\\"')}"`).join(' ');
-    sh(`git commit ${msgParts}`);
+    const commitArgs = ['commit'];
+    for (const p of parts) {
+      commitArgs.push('-m', p);
+    }
+    execFileSync('git', commitArgs, { stdio: 'pipe', encoding: 'utf8' });
     process.stderr.write('(committed)\n');
   }
 
   if (isAll) {
     process.stderr.write('(pushing...)\n');
     try {
-      sh('git push');
+      execFileSync('git', ['push'], { stdio: 'pipe', encoding: 'utf8' });
       process.stderr.write('(pushed)\n');
     } catch (e) {
       const branch = sh('git rev-parse --abbrev-ref HEAD');
-      sh(`git push -u origin ${branch}`);
+      execFileSync('git', ['push', '-u', 'origin', branch], { stdio: 'pipe', encoding: 'utf8' });
       process.stderr.write('(pushed with upstream)\n');
     }
   }
 
   try {
-    const fs = require('fs');
-    const path = require('path');
-    const os = require('os');
-    const tmp = path.join(os.tmpdir(), 'gc-' + Date.now() + '.txt');
-    fs.writeFileSync(tmp, formatted, 'utf8');
     switch (process.platform) {
       case 'win32':
-        execSync(`powershell -c "Get-Content '${tmp}' | Set-Clipboard"`, { stdio: 'pipe' });
+        execFileSync('powershell', ['-c', 'Set-Clipboard'], { input: formatted });
+        break;
+      case 'darwin':
+        execFileSync('pbcopy', { input: formatted });
         break;
       case 'linux':
         try {
-          execSync(`clip.exe < "${tmp}"`, { stdio: 'pipe' });
+          execFileSync('clip.exe', { input: formatted });
         } catch {
           try {
-            execSync(`wl-copy < "${tmp}"`, { stdio: 'pipe' });
+            execFileSync('wl-copy', { input: formatted });
           } catch {
-            execSync(`xclip -selection clipboard < "${tmp}"`, { stdio: 'pipe' });
+            execFileSync('xclip', ['-selection', 'clipboard'], { input: formatted });
           }
         }
         break;
     }
-    fs.unlinkSync(tmp);
     process.stderr.write('(panoya kopyalandi)\n');
   } catch {}
 }
