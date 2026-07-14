@@ -209,6 +209,17 @@ describe('CLI', () => {
       await cli.main();
       expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push'], expect.anything());
     });
+
+    test('--all with no diff pushes only (no commit, no AI)', async () => {
+      process.argv = ['node', 'cli.js', '--all'];
+      await cli.main();
+      expect(mockExecSync).toHaveBeenCalledWith('git diff --cached', { stdio: 'pipe', encoding: 'utf8' });
+      expect(mockExecSync).toHaveBeenCalledWith('git diff', { stdio: 'pipe', encoding: 'utf8' });
+      expect(mockGenerateCommitMessage).not.toHaveBeenCalled();
+      expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push'], expect.anything());
+      expect(stderrSpy).not.toHaveBeenCalledWith('No changes to commit.\n');
+      expect(exitSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('clipboard', () => {

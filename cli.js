@@ -64,18 +64,22 @@ async function main() {
 
   let diff;
   let wasStaged = false;
+  let formatted;
 
   if (isAll || isCommit) {
     const result = await getDiffFromGit();
     if (!result.diff) {
-      process.stderr.write('No changes to commit.\n');
-      process.exit(1);
-    }
-    diff = result.diff;
-    wasStaged = result.staged;
-    if (!wasStaged) {
-      sh('git add .');
-      process.stderr.write('(staged all changes)\n');
+      if (isCommit) {
+        process.stderr.write('No changes to commit.\n');
+        process.exit(1);
+      }
+    } else {
+      diff = result.diff;
+      wasStaged = result.staged;
+      if (!wasStaged) {
+        sh('git add .');
+        process.stderr.write('(staged all changes)\n');
+      }
     }
   } else {
     const chunks = [];
@@ -89,14 +93,16 @@ async function main() {
     }
   }
 
-  const result = await groqApi.generateCommitMessage(diff);
-  const formatted = msgFormatter.format(result.type, result.message, result.description);
-  console.log(formatted);
+  if (diff) {
+    const result = await groqApi.generateCommitMessage(diff);
+    formatted = msgFormatter.format(result.type, result.message, result.description);
+    console.log(formatted);
 
-  const stats = diffParser.parseDiff(diff);
-  saveCommit(diff, formatted, result.type, stats);
+    const stats = diffParser.parseDiff(diff);
+    saveCommit(diff, formatted, result.type, stats);
+  }
 
-  if (isAll || isCommit) {
+  if (diff && (isAll || isCommit)) {
     process.stderr.write('(committing...)\n');
     const parts = formatted.split(/\n\n/);
     const commitArgs = ['commit'];
@@ -119,28 +125,30 @@ async function main() {
     }
   }
 
-  try {
-    switch (process.platform) {
-      case 'win32':
-        execFileSync('powershell', ['-c', 'Set-Clipboard'], { input: formatted });
-        break;
-      case 'darwin':
-        execFileSync('pbcopy', { input: formatted });
-        break;
-      case 'linux':
-        try {
-          execFileSync('clip.exe', { input: formatted });
-        } catch {
+  if (formatted) {
+    try {
+      switch (process.platform) {
+        case 'win32':
+          execFileSync('powershell', ['-c', 'Set-Clipboard'], { input: formatted });
+          break;
+        case 'darwin':
+          execFileSync('pbcopy', { input: formatted });
+          break;
+        case 'linux':
           try {
-            execFileSync('wl-copy', { input: formatted });
+            execFileSync('clip.exe', { input: formatted });
           } catch {
-            execFileSync('xclip', ['-selection', 'clipboard'], { input: formatted });
+            try {
+              execFileSync('wl-copy', { input: formatted });
+            } catch {
+              execFileSync('xclip', ['-selection', 'clipboard'], { input: formatted });
+            }
           }
-        }
-        break;
-    }
-    process.stderr.write('(panoya kopyalandi)\n');
-  } catch {}
+          break;
+      }
+      process.stderr.write('(panoya kopyalandi)\n');
+    } catch {}
+  }
 }
 
 if (require.main === module) {
