@@ -234,6 +234,23 @@ describe('CLI', () => {
       expect(stderrSpy).not.toHaveBeenCalledWith('No changes to commit.\n');
       expect(exitSpy).not.toHaveBeenCalled();
     });
+
+    test('--all with no diff does not attempt clipboard copy', async () => {
+      process.argv = ['node', 'cli.js', '--all'];
+      await cli.main();
+      expect(mockExecFileSync).not.toHaveBeenCalledWith('pbcopy', expect.anything());
+    });
+
+    test('--all with no diff and push failure still falls back to upstream push', async () => {
+      mockExecSync
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce('')
+        .mockReturnValueOnce('main');
+      mockExecFileSync.mockImplementationOnce(() => { throw new Error('push failed'); });
+      process.argv = ['node', 'cli.js', '--all'];
+      await cli.main();
+      expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push', '-u', 'origin', 'main'], expect.anything());
+    });
   });
 
   describe('clipboard', () => {
