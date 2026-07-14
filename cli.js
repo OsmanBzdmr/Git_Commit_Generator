@@ -59,6 +59,11 @@ async function main() {
     return;
   }
 
+  if (args.includes('--version') || args.includes('-v')) {
+    console.log(require('./package.json').version);
+    return;
+  }
+
   const isAll = args.includes('--all') || args.includes('-a');
   const isCommit = args.includes('--commit') || args.includes('-c');
 

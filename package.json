@@ -1,6 +1,6 @@
 {
   "name": "git-commit-msg-generator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "AI-powered Git commit message generator (CLI)",
   "main": "cli.js",
   "bin": {
@@ -17,6 +17,9 @@
     "conventional-commits",
     "automation"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "author": "Osman",
   "license": "MIT",
   "dependencies": {

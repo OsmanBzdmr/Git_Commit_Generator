@@ -114,6 +114,20 @@ describe('CLI', () => {
     });
   });
 
+  describe('--version / -v', () => {
+    test('--version prints package version', async () => {
+      process.argv = ['node', 'cli.js', '--version'];
+      await cli.main();
+      expect(logSpy).toHaveBeenCalledWith('1.1.0');
+    });
+
+    test('-v is alias for --version', async () => {
+      process.argv = ['node', 'cli.js', '-v'];
+      await cli.main();
+      expect(logSpy).toHaveBeenCalledWith('1.1.0');
+    });
+  });
+
   describe('stdin mode (no flags)', () => {
     test('generates commit message from stdin diff', async () => {
       process.stdin = mockStdin('diff --git a/test.js b/test.js\n+test');
