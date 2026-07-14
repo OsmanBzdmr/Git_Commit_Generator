@@ -11,7 +11,7 @@ AI-powered CLI tool that analyzes your `git diff` and generates clean, conventio
 - 🤖 **Groq AI** — fast commit message generation via Llama 3.3 70B
 - 🧠 **Fallback mode** — generates stat-based messages when API is unavailable
 - 🏷️ **Conventional Commits** — `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `style`, `perf`
-- 📋 **Cross-platform clipboard** — auto-copies result on Windows and Linux
+- 📋 **Cross-platform clipboard** — auto-copies result on Windows, macOS and Linux
 - 💾 **Local history** — stores generated messages in SQLite, viewable with `--history`
 - 🚀 **Git integration** — stage, commit, and push in one command
 
@@ -87,6 +87,7 @@ Git_Commit_Generator/
 │   ├── msgFormatter.js       # Commit message formatting
 │   └── database.js           # SQLite history storage
 ├── tests/
+│   ├── cli.test.js
 │   ├── diffParser.test.js
 │   ├── msgFormatter.test.js
 │   ├── groqApi.test.js
@@ -108,11 +109,12 @@ npm test
 
 | Module | Coverage | Tests |
 |--------|:--------:|:-----:|
+| `cli.js` | 96% | 20 |
 | `diffParser.js` | 100% | 30 |
 | `msgFormatter.js` | 100% | 20 |
 | `groqApi.js` | 100% | 19 |
 | `database.js` | 83% | 7 |
-| **Total** | **96%** | **76** |
+| **Total** | **96%** | **96** |
 
 ---
 
