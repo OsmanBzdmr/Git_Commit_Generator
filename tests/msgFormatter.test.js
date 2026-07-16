@@ -71,5 +71,25 @@ describe('Message Formatter', () => {
       const result = format('feat2', 'Numbered type');
       expect(result).toContain('feat:');
     });
+
+    test('formats breaking change type with !', () => {
+      const result = format('feat!', 'Breaking change');
+      expect(result).toBe('feat!: Breaking change');
+    });
+
+    test('normalizes breaking change type and preserves !', () => {
+      const result = format('FIX!', 'Breaking fix');
+      expect(result).toBe('fix!: Breaking fix');
+    });
+
+    test('formats breaking change with description', () => {
+      const result = format('feat!', 'Remove old API', 'Drops v1 endpoints');
+      expect(result).toBe('feat!: Remove old API\n\nDrops v1 endpoints');
+    });
+
+    test('invalid breaking type falls back to feat with !', () => {
+      const result = format('invalid!', 'Breaking change');
+      expect(result).toBe('feat!: Breaking change');
+    });
   });
 });

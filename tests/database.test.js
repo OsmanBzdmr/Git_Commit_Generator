@@ -84,4 +84,20 @@ describe('Database', () => {
       }
     }, 200);
   }, 5000);
+
+  test('saves empty string diff_input instead of null when diff is missing', (done) => {
+    database.saveCommit(undefined, 'chore: test', 'chore', {});
+
+    setTimeout(async () => {
+      try {
+        const commits = await database.getCommitHistory();
+        const saved = commits.find(c => c.generated_message === 'chore: test');
+        expect(saved).toBeDefined();
+        expect(saved.diff_input).toBe('');
+        done();
+      } catch (err) {
+        done(err);
+      }
+    }, 200);
+  }, 5000);
 });

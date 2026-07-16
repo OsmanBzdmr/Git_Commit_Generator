@@ -23,6 +23,10 @@ function detectType(diff) {
   return 'chore';
 }
 
+function detectBreaking(diff) {
+  return /BREAKING|^(?:renamed|removed|deleted).*\(|exports\.\w+\s*=|function\s+\w+\s*\(/.test(diff);
+}
+
 function generateFallbackMessage(diff) {
   const type = detectType(diff);
 
@@ -31,7 +35,7 @@ function generateFallbackMessage(diff) {
   const deletions = (diff.match(/^-[^-]/gm) || []).length;
 
   return {
-    type,
+    type: detectBreaking(diff) ? type + '!' : type,
     message: messages[type] || 'Update code',
     description: fileCount > 1
       ? `Changes across ${fileCount} files: +${additions} -${deletions} lines`
@@ -39,4 +43,4 @@ function generateFallbackMessage(diff) {
   };
 }
 
-module.exports = { generateFallbackMessage, detectType };
+module.exports = { generateFallbackMessage, detectType, detectBreaking };

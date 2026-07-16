@@ -38,6 +38,16 @@ describe('Groq API Integration', () => {
         expect(result).toHaveProperty('description');
       });
 
+      test('should truncate diff over 4000 chars', async () => {
+        const bigDiff = 'a\n'.repeat(3000);
+        const stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
+        const result = await groqApi.generateCommitMessage(bigDiff);
+        expect(result).toHaveProperty('type');
+        expect(result).toHaveProperty('message');
+        expect(stderrSpy).toHaveBeenCalledWith('(diff truncated to 4000 chars)\n');
+        stderrSpy.mockRestore();
+      });
+
       const fallbackCases = [
         { diff: 'adding test for login spec', expectedType: 'test' },
         { diff: 'update readme documentation', expectedType: 'docs' },
@@ -55,6 +65,17 @@ describe('Groq API Integration', () => {
           const result = await groqApi.generateCommitMessage(diff);
           expect(result.type).toBe(expectedType);
         });
+      });
+
+      test('fallback detects breaking change', async () => {
+        const result = await groqApi.generateCommitMessage('BREAKING CHANGE: removed public API');
+        expect(result.type).toBe('chore!');
+      });
+
+      test('fallback does not mark non-breaking as breaking', async () => {
+        const result = await groqApi.generateCommitMessage('refactor user module');
+        expect(result.type).toBe('refactor');
+        expect(result.type).not.toContain('!');
       });
     });
 
@@ -80,6 +101,33 @@ describe('Groq API Integration', () => {
         expect(result.type).toBe('feat');
         expect(result.message).toBe('Add new feature');
         expect(result.description).toBe('Implements the login flow');
+      });
+
+      test('should append ! to type when BREAKING is yes', async () => {
+        mockFetch({
+          choices: [{
+            message: {
+              content: 'TYPE: feat\nBREAKING: yes\nMESSAGE: Remove deprecated API\nBODY: Drops v1 endpoints'
+            }
+          }]
+        });
+
+        const result = await groqApi.generateCommitMessage('test diff');
+        expect(result.type).toBe('feat!');
+        expect(result.message).toBe('Remove deprecated API');
+      });
+
+      test('should not add ! when BREAKING is no', async () => {
+        mockFetch({
+          choices: [{
+            message: {
+              content: 'TYPE: fix\nBREAKING: no\nMESSAGE: Fix login bug'
+            }
+          }]
+        });
+
+        const result = await groqApi.generateCommitMessage('test diff');
+        expect(result.type).toBe('fix');
       });
 
       test('should handle API response without BODY', async () => {

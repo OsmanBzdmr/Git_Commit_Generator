@@ -38,7 +38,7 @@ const saveCommit = (diffInput, generatedMessage, messageType, stats) => {
     `);
 
     stmt.run(
-      diffInput,
+      diffInput || '',
       generatedMessage,
       messageType,
       safeStats.filesChanged || 0,

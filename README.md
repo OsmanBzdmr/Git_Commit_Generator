@@ -112,12 +112,12 @@ npm test
 
 | Module | Coverage | Tests |
 |--------|:--------:|:-----:|
-| `cli.js` | 96% | 24 |
+| `cli.js` | 95% | 25 |
 | `diffParser.js` | 100% | 30 |
-| `msgFormatter.js` | 100% | 20 |
-| `groqApi.js` | 100% | 19 |
-| `database.js` | 83% | 7 |
-| **Total** | **96%** | **100** |
+| `msgFormatter.js` | 100% | 25 |
+| `groqApi.js` | 100% | 23 |
+| `database.js` | 83% | 8 |
+| **Total** | **96%** | **112** |
 
 ---
 

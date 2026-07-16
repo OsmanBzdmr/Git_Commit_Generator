@@ -41,7 +41,11 @@ async function getDiffFromGit() {
     const unstaged = sh('git diff');
     if (unstaged) return { diff: unstaged, staged: false };
     return { diff: '', staged: false };
-  } catch {
+  } catch (e) {
+    if (/not a git repository/i.test(e.message)) {
+      process.stderr.write('Not inside a git repository.\n');
+      process.exit(1);
+    }
     return { diff: '', staged: false };
   }
 }
@@ -87,11 +91,41 @@ async function main() {
       }
     }
   } else {
-    const chunks = [];
-    for await (const chunk of process.stdin) {
-      chunks.push(chunk);
+    const timeoutMs = parseInt(process.env.STDIN_TIMEOUT_MS, 10) || 5000;
+    const controller = new AbortController();
+
+    async function readStdin() {
+      const chunks = [];
+      const reader = process.stdin[Symbol.asyncIterator]();
+      try {
+        while (true) {
+          const result = await Promise.race([
+            reader.next(),
+            new Promise((_, reject) => {
+              if (controller.signal.aborted) return reject(new Error('timeout'));
+              controller.signal.addEventListener('abort', () => reject(new Error('timeout')), { once: true });
+            }),
+          ]);
+          if (result.done) break;
+          chunks.push(result.value);
+        }
+      } finally {
+        if (reader.return) await reader.return();
+      }
+      return Buffer.concat(chunks).toString('utf8');
     }
-    diff = Buffer.concat(chunks).toString('utf8');
+
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      diff = await readStdin();
+    } catch {
+      process.stderr.write('No input received (timeout).\n');
+      process.exit(1);
+    } finally {
+      clearTimeout(id);
+    }
+
     if (!diff.trim()) {
       printUsage();
       process.exit(1);

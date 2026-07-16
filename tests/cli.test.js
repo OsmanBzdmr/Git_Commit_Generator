@@ -144,6 +144,23 @@ describe('CLI', () => {
       await expect(cli.main()).rejects.toThrow('process.exit');
       expect(logSpy).toHaveBeenCalled();
     });
+
+    test('stdin timeout exits with message when no input received', async () => {
+      process.env.STDIN_TIMEOUT_MS = '50';
+      const hangingStdin = {
+        [Symbol.asyncIterator]: () => ({
+          next: () => new Promise(() => {}),
+        }),
+      };
+      Object.defineProperty(process, 'stdin', {
+        value: hangingStdin,
+        writable: true,
+        configurable: true,
+      });
+      await expect(cli.main()).rejects.toThrow('process.exit');
+      expect(stderrSpy).toHaveBeenCalledWith('No input received (timeout).\n');
+      delete process.env.STDIN_TIMEOUT_MS;
+    });
   });
 
   describe('--commit / -c', () => {
@@ -191,6 +208,15 @@ describe('CLI', () => {
         ['commit', '-m', 'feat: test message', '-m', 'body text'],
         expect.anything()
       );
+    });
+
+    test('--commit exits with message when not in a git repository', async () => {
+      const gitError = new Error('fatal: not a git repository (or any of the parent directories): .git');
+      mockExecSync.mockImplementation(() => { throw gitError; });
+      process.argv = ['node', 'cli.js', '--commit'];
+      await expect(cli.main()).rejects.toThrow('process.exit');
+      expect(stderrSpy).toHaveBeenCalledWith('Not inside a git repository.\n');
+      expect(mockGenerateCommitMessage).not.toHaveBeenCalled();
     });
   });
 
