@@ -50,7 +50,7 @@ describe('CLI', () => {
     jest.resetAllMocks();
 
     mockFormat.mockReturnValue('feat: test message\n\nbody text');
-    mockGenerateCommitMessage.mockResolvedValue({ type: 'feat', message: 'test message', description: 'body text' });
+    mockGenerateCommitMessage.mockResolvedValue({ type: 'feat', scope: null, message: 'test message', description: 'body text' });
     mockParseDiff.mockReturnValue({ filesChanged: 1, files: ['test.js'], additions: 2, deletions: 1 });
     mockSaveCommit.mockResolvedValue();
     mockGetCommitHistory.mockResolvedValue([
@@ -118,13 +118,13 @@ describe('CLI', () => {
     test('--version prints package version', async () => {
       process.argv = ['node', 'cli.js', '--version'];
       await cli.main();
-      expect(logSpy).toHaveBeenCalledWith('1.1.0');
+      expect(logSpy).toHaveBeenCalledWith('1.3.0');
     });
 
     test('-v is alias for --version', async () => {
       process.argv = ['node', 'cli.js', '-v'];
       await cli.main();
-      expect(logSpy).toHaveBeenCalledWith('1.1.0');
+      expect(logSpy).toHaveBeenCalledWith('1.3.0');
     });
   });
 
@@ -132,8 +132,8 @@ describe('CLI', () => {
     test('generates commit message from stdin diff', async () => {
       process.stdin = mockStdin('diff --git a/test.js b/test.js\n+test');
       await cli.main();
-      expect(mockGenerateCommitMessage).toHaveBeenCalledWith('diff --git a/test.js b/test.js\n+test');
-      expect(mockFormat).toHaveBeenCalledWith('feat', 'test message', 'body text');
+      expect(mockGenerateCommitMessage).toHaveBeenCalledWith('diff --git a/test.js b/test.js\n+test', '');
+      expect(mockFormat).toHaveBeenCalledWith('feat', 'test message', 'body text', null);
       expect(mockParseDiff).toHaveBeenCalled();
       expect(mockSaveCommit).toHaveBeenCalled();
       expect(exitSpy).not.toHaveBeenCalled();
@@ -143,6 +143,15 @@ describe('CLI', () => {
       process.stdin = mockStdin('');
       await expect(cli.main()).rejects.toThrow('process.exit');
       expect(logSpy).toHaveBeenCalled();
+    });
+
+    test('-m with stdin uses custom message, skips AI', async () => {
+      process.stdin = mockStdin('diff --git a/test.js b/test.js\n+test');
+      process.argv = ['node', 'cli.js', '-m', 'feat: custom message'];
+      await cli.main();
+      expect(mockGenerateCommitMessage).not.toHaveBeenCalled();
+      expect(logSpy).not.toHaveBeenCalled();
+      expect(mockSaveCommit).toHaveBeenCalled();
     });
 
     test('stdin timeout exits with message when no input received', async () => {
@@ -218,6 +227,25 @@ describe('CLI', () => {
       expect(stderrSpy).toHaveBeenCalledWith('Not inside a git repository.\n');
       expect(mockGenerateCommitMessage).not.toHaveBeenCalled();
     });
+
+    test('-m with --commit commits custom message', async () => {
+      mockExecSync.mockReturnValueOnce('diff --git a/test.js b/test.js\n+new code');
+      process.argv = ['node', 'cli.js', '--commit', '-m', 'fix: resolve bug'];
+      await cli.main();
+      expect(mockGenerateCommitMessage).not.toHaveBeenCalled();
+      expect(mockExecFileSync).toHaveBeenCalledWith(
+        'git',
+        ['commit', '-m', 'fix: resolve bug'],
+        expect.anything()
+      );
+    });
+
+    test('-m with --commit and no diff still exits', async () => {
+      process.argv = ['node', 'cli.js', '--commit', '-m', 'fix: nope'];
+      await expect(cli.main()).rejects.toThrow('process.exit');
+      expect(stderrSpy).toHaveBeenCalledWith('No changes to commit.\n');
+      expect(mockGenerateCommitMessage).not.toHaveBeenCalled();
+    });
   });
 
   describe('--all / -a', () => {
@@ -232,6 +260,7 @@ describe('CLI', () => {
     test('--all push failure falls back to upstream', async () => {
       mockExecSync
         .mockReturnValueOnce('diff --git a/test.js b/test.js\n+new code')
+        .mockReturnValueOnce('feature/login')
         .mockReturnValueOnce('feature/login');
       mockExecFileSync
         .mockReturnValueOnce(undefined)
@@ -276,6 +305,15 @@ describe('CLI', () => {
       process.argv = ['node', 'cli.js', '--all'];
       await cli.main();
       expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push', '-u', 'origin', 'main'], expect.anything());
+    });
+
+    test('-m with --all commits custom message and pushes', async () => {
+      mockExecSync.mockReturnValueOnce('diff --git a/test.js b/test.js\n+new code');
+      process.argv = ['node', 'cli.js', '--all', '-m', 'feat: new feature'];
+      await cli.main();
+      expect(mockGenerateCommitMessage).not.toHaveBeenCalled();
+      expect(mockExecFileSync).toHaveBeenCalledWith('git', ['commit', '-m', 'feat: new feature'], expect.anything());
+      expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push'], expect.anything());
     });
   });
 

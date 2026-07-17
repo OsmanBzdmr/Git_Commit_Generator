@@ -91,5 +91,20 @@ describe('Message Formatter', () => {
       const result = format('invalid!', 'Breaking change');
       expect(result).toBe('feat!: Breaking change');
     });
+
+    test('formats with scope', () => {
+      const result = format('feat', 'Add login', '', 'auth');
+      expect(result).toBe('feat(auth): Add login');
+    });
+
+    test('formats breaking change with scope', () => {
+      const result = format('feat!', 'Remove API', 'Drops old endpoints', 'api');
+      expect(result).toBe('feat!(api): Remove API\n\nDrops old endpoints');
+    });
+
+    test('normalizes type with scope', () => {
+      const result = format('FIX', 'Bug fix', '', 'login');
+      expect(result).toBe('fix(login): Bug fix');
+    });
   });
 });

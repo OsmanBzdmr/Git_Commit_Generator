@@ -130,6 +130,33 @@ describe('Groq API Integration', () => {
         expect(result.type).toBe('fix');
       });
 
+      test('should parse SCOPE field', async () => {
+        mockFetch({
+          choices: [{
+            message: {
+              content: 'TYPE: feat\nSCOPE: auth\nMESSAGE: Add login'
+            }
+          }]
+        });
+
+        const result = await groqApi.generateCommitMessage('test diff');
+        expect(result.scope).toBe('auth');
+        expect(result.type).toBe('feat');
+      });
+
+      test('should set scope to null when absent', async () => {
+        mockFetch({
+          choices: [{
+            message: {
+              content: 'TYPE: fix\nMESSAGE: Fix bug'
+            }
+          }]
+        });
+
+        const result = await groqApi.generateCommitMessage('test diff');
+        expect(result.scope).toBeNull();
+      });
+
       test('should handle API response without BODY', async () => {
         mockFetch({
           choices: [{

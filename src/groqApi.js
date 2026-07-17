@@ -3,7 +3,7 @@ const { generateFallbackMessage } = require('./fallbackGenerator');
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 const groqApi = {
-  async generateCommitMessage(diffContent) {
+  async generateCommitMessage(diffContent, branchName) {
     const MAX_CHARS = 4000;
     if (diffContent.length > MAX_CHARS) {
       diffContent = diffContent.slice(0, MAX_CHARS) + '\n... (truncated)';
@@ -15,16 +15,22 @@ const groqApi = {
 
     if (!apiKey) {
       console.warn('GROQ_API_KEY bulunamadı, fallback modu kullanılıyor');
-      return generateFallbackMessage(diffContent);
+      return generateFallbackMessage(diffContent, branchName);
     }
 
     const systemPrompt = 'You are a Git commit message expert. Generate concise, professional commit messages following the Angular convention.';
-    const userPrompt = `Analyze this git diff and generate a commit message.
+    let userPrompt = `Analyze this git diff and generate a commit message.
 
 Git Diff:
 \`\`\`
 ${diffContent}
-\`\`\`
+\`\`\``;
+
+    if (branchName) {
+      userPrompt += `\n\nBranch: ${branchName}`;
+    }
+
+    userPrompt += `
 
 Rules:
 - Use Angular convention: feat, fix, docs, refactor, test, chore, style, perf
@@ -35,6 +41,7 @@ Rules:
 
 Respond in this exact format:
 TYPE: feat|fix|docs|refactor|test|chore|style|perf
+SCOPE: [optional scope in parentheses]
 BREAKING: yes|no
 MESSAGE: [Your message here]
 BODY: [Optional details about the change]`;
@@ -75,13 +82,14 @@ BODY: [Optional details about the change]`;
         console.error('Rate limit aşıldı.');
       }
 
-      return generateFallbackMessage(diffContent);
+      return generateFallbackMessage(diffContent, branchName);
     }
   }
 };
 
 function parseAIResponse(content) {
   const typeMatch = content.match(/TYPE:\s*(\w+)/i);
+  const scopeMatch = content.match(/SCOPE:\s*(.+?)(?:\n|$)/i);
   const breakingMatch = content.match(/BREAKING:\s*(yes|no)/i);
   const messageMatch = content.match(/MESSAGE:\s*(.+?)(?:\n|$)/i);
   const bodyMatch = content.match(/BODY:\s*([\s\S]*?)(?=\n\w+:|$)/i);
@@ -93,6 +101,7 @@ function parseAIResponse(content) {
 
   return {
     type,
+    scope: scopeMatch ? scopeMatch[1].trim() : null,
     message: messageMatch ? messageMatch[1].trim() : 'Update code',
     description: bodyMatch ? bodyMatch[1].trim() : ''
   };

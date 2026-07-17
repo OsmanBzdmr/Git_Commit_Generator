@@ -2,7 +2,7 @@
 
 ![Test](https://github.com/OsmanBzdmr/Git_Commit_Generator/actions/workflows/test.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-blue)
 ![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen)
 
 AI-powered CLI tool that analyzes your `git diff` and generates clean, conventional commit messages using Groq (Llama 3.3 70B).
@@ -14,6 +14,9 @@ AI-powered CLI tool that analyzes your `git diff` and generates clean, conventio
 - 🤖 **Groq AI** — fast commit message generation via Llama 3.3 70B
 - 🧠 **Fallback mode** — generates stat-based messages when API is unavailable
 - 🏷️ **Conventional Commits** — `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `style`, `perf`
+- 🎯 **Scope support** — detects type and scope from branch names (`feat/login` → `feat(login):`)
+- 🌿 **Branch-aware** — uses branch name to improve fallback type & scope detection
+- 📝 **Custom messages** — `--message` / `-m` flag bypasses AI entirely
 - 📋 **Cross-platform clipboard** — auto-copies result on Windows, macOS and Linux
 - 💾 **Local history** — stores generated messages in SQLite, viewable with `--history`
 - 🚀 **Git integration** — stage, commit, and push in one command
@@ -61,6 +64,7 @@ git-commit-gen --history
 | _(none)_ | — | Reads diff from stdin, prints message, copies to clipboard |
 | `--commit` | `-c` | Stages all changes, generates message, commits |
 | `--all` | `-a` | Stages all changes, commits, and pushes |
+| `--message` | `-m` | Use a custom commit message (skips AI) |
 | `--history` | `-h` | Shows last 50 commit messages from local history |
 
 **Example output:**
@@ -94,7 +98,8 @@ Git_Commit_Generator/
 │   ├── diffParser.test.js
 │   ├── msgFormatter.test.js
 │   ├── groqApi.test.js
-│   └── database.test.js
+│   ├── database.test.js
+│   └── fallbackGenerator.test.js
 ├── db/
 │   └── schema.sql
 ├── cli.js                    # CLI entry point
@@ -114,10 +119,11 @@ npm test
 |--------|:--------:|:-----:|
 | `cli.js` | 95% | 25 |
 | `diffParser.js` | 100% | 30 |
+| `fallbackGenerator.js` | 100% | 18 |
 | `msgFormatter.js` | 100% | 25 |
-| `groqApi.js` | 100% | 23 |
+| `groqApi.js` | 98% | 23 |
 | `database.js` | 83% | 8 |
-| **Total** | **96%** | **112** |
+| **Total** | **95%** | **139** |
 
 ---
 

@@ -18,6 +18,7 @@ Usage:
   git-commit-gen --all, -a               Stage all + commit + push
   git-commit-gen --history, -h           Show commit history
   git-commit-gen --help                  Show this help
+  git-commit-gen -m "message"            Use custom message (skips AI)
   `);
 }
 
@@ -70,10 +71,12 @@ async function main() {
 
   const isAll = args.includes('--all') || args.includes('-a');
   const isCommit = args.includes('--commit') || args.includes('-c');
+  const mIndex = args.indexOf('-m');
+  const userMessage = mIndex !== -1 && args[mIndex + 1] ? args[mIndex + 1] : null;
 
   let diff;
   let wasStaged = false;
-  let formatted;
+  let formatted = userMessage;
 
   if (isAll || isCommit) {
     const result = await getDiffFromGit();
@@ -133,12 +136,18 @@ async function main() {
   }
 
   if (diff) {
-    const result = await groqApi.generateCommitMessage(diff);
-    formatted = msgFormatter.format(result.type, result.message, result.description);
-    console.log(formatted);
+    let result;
+    if (!userMessage) {
+      let branchName;
+      try { branchName = sh('git rev-parse --abbrev-ref HEAD'); } catch { branchName = null; }
+      result = await groqApi.generateCommitMessage(diff, branchName);
+      formatted = msgFormatter.format(result.type, result.message, result.description, result.scope);
+      console.log(formatted);
+    }
 
+    const messageType = userMessage ? (userMessage.match(/^(\w+)/) || ['', 'custom'])[1] : result.type;
     const stats = diffParser.parseDiff(diff);
-    saveCommit(diff, formatted, result.type, stats);
+    saveCommit(diff, formatted, messageType, stats);
   }
 
   if (diff && (isAll || isCommit)) {

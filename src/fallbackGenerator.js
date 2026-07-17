@@ -9,7 +9,32 @@ const messages = {
   chore: 'Maintenance update'
 };
 
-function detectType(diff) {
+const BRANCH_PATTERNS = [
+  { regex: /^(?:feature|feat)\/(.+)/i, type: 'feat' },
+  { regex: /^(?:bugfix|fix|hotfix)\/(.+)/i, type: 'fix' },
+  { regex: /^docs\/(.+)/i, type: 'docs' },
+  { regex: /^refactor\/(.+)/i, type: 'refactor' },
+  { regex: /^test\/(.+)/i, type: 'test' },
+  { regex: /^chore\/(.+)/i, type: 'chore' },
+  { regex: /^perf\/(.+)/i, type: 'perf' },
+  { regex: /^style\/(.+)/i, type: 'style' },
+];
+
+function branchInfo(branchName) {
+  if (!branchName) return { type: null, scope: null };
+  for (const { regex, type } of BRANCH_PATTERNS) {
+    const match = branchName.match(regex);
+    if (match) {
+      return { type, scope: match[1] || null };
+    }
+  }
+  return { type: null, scope: null };
+}
+
+function detectType(diff, branchName) {
+  const fromBranch = branchInfo(branchName);
+  if (fromBranch.type) return fromBranch.type;
+
   const lower = diff.toLowerCase();
 
   if (/\btest\b|spec|\.test\.|\.spec\./.test(diff)) return 'test';
@@ -27,8 +52,9 @@ function detectBreaking(diff) {
   return /BREAKING|^(?:renamed|removed|deleted).*\(|exports\.\w+\s*=|function\s+\w+\s*\(/.test(diff);
 }
 
-function generateFallbackMessage(diff) {
-  const type = detectType(diff);
+function generateFallbackMessage(diff, branchName) {
+  const branch = branchInfo(branchName);
+  const type = branch.type || detectType(diff, branchName);
 
   const fileCount = (diff.match(/^diff --git/gm) || []).length || 1;
   const additions = (diff.match(/^\+[^+]/gm) || []).length;
@@ -36,6 +62,7 @@ function generateFallbackMessage(diff) {
 
   return {
     type: detectBreaking(diff) ? type + '!' : type,
+    scope: branch.scope || null,
     message: messages[type] || 'Update code',
     description: fileCount > 1
       ? `Changes across ${fileCount} files: +${additions} -${deletions} lines`
@@ -43,4 +70,4 @@ function generateFallbackMessage(diff) {
   };
 }
 
-module.exports = { generateFallbackMessage, detectType, detectBreaking };
+module.exports = { generateFallbackMessage, detectType, detectBreaking, branchInfo };
