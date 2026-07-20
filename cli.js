@@ -19,7 +19,14 @@ Usage:
   git-commit-gen --history, -h           Show commit history
   git-commit-gen --help                  Show this help
   git-commit-gen -m "message"            Use custom message (skips AI)
+  git-commit-gen --version, -v           Show version
   `);
+}
+
+const KNOWN_FLAGS = ['--help', '--history', '-h', '--version', '-v', '--all', '-a', '--commit', '-c', '--message', '-m'];
+
+function findUnknownFlags(args) {
+  return args.filter(arg => arg.startsWith('-') && !KNOWN_FLAGS.includes(arg));
 }
 
 async function showHistory() {
@@ -54,6 +61,13 @@ async function getDiffFromGit() {
 async function main() {
   const args = process.argv.slice(2);
 
+  const unknown = findUnknownFlags(args);
+  if (unknown.length > 0) {
+    process.stderr.write('Unknown flag(s): ' + unknown.join(', ') + '\n');
+    printUsage();
+    process.exit(1);
+  }
+
   if (args.includes('--help')) {
     printUsage();
     return;
@@ -72,7 +86,12 @@ async function main() {
   const isAll = args.includes('--all') || args.includes('-a');
   const isCommit = args.includes('--commit') || args.includes('-c');
   const mIndex = args.indexOf('-m');
-  const userMessage = mIndex !== -1 && args[mIndex + 1] ? args[mIndex + 1] : null;
+  const userMessage = mIndex !== -1 ? args[mIndex + 1] : null;
+
+  if (mIndex !== -1 && !userMessage) {
+    process.stderr.write('Error: -m requires a message argument.\n');
+    process.exit(1);
+  }
 
   let diff;
   let wasStaged = false;
@@ -206,4 +225,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { main, sh, getDiffFromGit, showHistory, printUsage };
+module.exports = { main, sh, getDiffFromGit, showHistory, printUsage, findUnknownFlags };

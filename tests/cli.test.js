@@ -78,6 +78,29 @@ describe('CLI', () => {
     expect(cli.getDiffFromGit).toBeDefined();
     expect(cli.showHistory).toBeDefined();
     expect(cli.printUsage).toBeDefined();
+    expect(cli.findUnknownFlags).toBeDefined();
+  });
+
+  describe('argument validation', () => {
+    test('findUnknownFlags returns empty for known flags', () => {
+      expect(cli.findUnknownFlags(['--commit', '-m', 'msg'])).toEqual([]);
+    });
+
+    test('findUnknownFlags detects unknown flags', () => {
+      expect(cli.findUnknownFlags(['--unknown', '--all', '--foo'])).toEqual(['--unknown', '--foo']);
+    });
+
+    test('exit with unknown flag', async () => {
+      process.argv = ['node', 'cli.js', '--unknown'];
+      await expect(cli.main()).rejects.toThrow('process.exit');
+      expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown flag'));
+    });
+
+    test('-m without value exits with error', async () => {
+      process.argv = ['node', 'cli.js', '-m'];
+      await expect(cli.main()).rejects.toThrow('process.exit');
+      expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining('-m requires a message'));
+    });
   });
 
   describe('--help', () => {
@@ -118,13 +141,13 @@ describe('CLI', () => {
     test('--version prints package version', async () => {
       process.argv = ['node', 'cli.js', '--version'];
       await cli.main();
-      expect(logSpy).toHaveBeenCalledWith('1.3.0');
+      expect(logSpy).toHaveBeenCalledWith(require('../package.json').version);
     });
 
     test('-v is alias for --version', async () => {
       process.argv = ['node', 'cli.js', '-v'];
       await cli.main();
-      expect(logSpy).toHaveBeenCalledWith('1.3.0');
+      expect(logSpy).toHaveBeenCalledWith(require('../package.json').version);
     });
   });
 
