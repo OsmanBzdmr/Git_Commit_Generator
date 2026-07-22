@@ -219,7 +219,7 @@ async function main() {
           }
           break;
       }
-      process.stderr.write('(panoya kopyalandi)\n');
+      process.stderr.write('(copied to clipboard)\n');
     } catch {}
   }
 }

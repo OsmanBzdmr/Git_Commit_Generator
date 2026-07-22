@@ -14,7 +14,7 @@ const groqApi = {
     const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
     if (!apiKey) {
-      console.warn('GROQ_API_KEY bulunamadı, fallback modu kullanılıyor');
+      console.warn('GROQ_API_KEY not found, using fallback mode');
       return generateFallbackMessage(diffContent, branchName);
     }
 
@@ -77,9 +77,9 @@ BODY: [Optional details about the change]`;
       console.error('Groq API Error:', error.message);
 
       if (/401|Unauthorized/i.test(error.message)) {
-        console.error('Geçersiz API anahtarı.');
+        console.error('Invalid API key.');
       } else if (/429|rate/i.test(error.message)) {
-        console.error('Rate limit aşıldı.');
+        console.error('Rate limit exceeded.');
       }
 
       return generateFallbackMessage(diffContent, branchName);

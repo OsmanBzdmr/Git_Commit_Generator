@@ -1,4 +1,3 @@
-require('dotenv').config();
 const groqApi = require('../src/groqApi');
 
 const mockFetch = (response, ok = true) => {

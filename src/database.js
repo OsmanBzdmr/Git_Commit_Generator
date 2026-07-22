@@ -12,7 +12,7 @@ if (dbPath !== ':memory:' && !fs.existsSync(dbDir)) {
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('Database connection error:', err);
+    console.error('Database connection error:', err.message);
   } else {
     initializeSchema();
   }
@@ -22,7 +22,7 @@ const initializeSchema = () => {
   const schema = fs.readFileSync(path.join(__dirname, '..', 'db', 'schema.sql'), 'utf8');
   db.exec(schema, (err) => {
     if (err) {
-      console.error('Schema initialization error:', err);
+      console.error('Schema initialization error:', err.message);
     }
   });
 };
@@ -46,7 +46,7 @@ const saveCommit = (diffInput, generatedMessage, messageType, stats) => {
       safeStats.deletions || 0,
       (err) => {
         if (err) {
-          console.error('Commit kaydedilemedi:', err.message);
+          console.error('Failed to save commit:', err.message);
           reject(err);
         } else {
           resolve();

@@ -3,7 +3,7 @@
 ![Test](https://github.com/OsmanBzdmr/Git_Commit_Generator/actions/workflows/test.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
 ![Version](https://img.shields.io/badge/version-1.3.2-blue)
-![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
 
 AI-powered CLI tool that analyzes your `git diff` and generates clean, conventional commit messages using Groq (Llama 3.3 70B).
 
@@ -130,12 +130,12 @@ npm test
 | Module | Coverage | Tests |
 |--------|:--------:|:-----:|
 | `cli.js` | 95% | 32 |
-| `diffParser.js` | 100% | 30 |
+| `diffParser.js` | 100% | 11 |
 | `fallbackGenerator.js` | 100% | 18 |
 | `msgFormatter.js` | 100% | 25 |
 | `groqApi.js` | 98% | 23 |
 | `database.js` | 83% | 8 |
-| **Total** | **96%** | **146** |
+| **Total** | **95%** | **127** |
 
 ---
 
