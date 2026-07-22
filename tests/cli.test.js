@@ -195,6 +195,37 @@ describe('CLI', () => {
     });
   });
 
+  describe('--dry-run', () => {
+    test('stdin dry-run skips save and clipboard', async () => {
+      process.stdin = mockStdin('diff --git a/test.js b/test.js\n+test');
+      process.argv = ['node', 'cli.js', '--dry-run'];
+      await cli.main();
+      expect(mockGenerateCommitMessage).toHaveBeenCalled();
+      expect(mockSaveCommit).not.toHaveBeenCalled();
+      expect(mockExecFileSync).not.toHaveBeenCalled();
+      expect(stderrSpy).toHaveBeenCalledWith('(dry-run — not saved or committed)\n');
+    });
+
+    test('--commit --dry-run skips commit and save', async () => {
+      mockExecSync.mockReturnValueOnce('diff --git a/test.js b/test.js\n+new code');
+      process.argv = ['node', 'cli.js', '--commit', '--dry-run'];
+      await cli.main();
+      expect(mockGenerateCommitMessage).toHaveBeenCalled();
+      expect(mockSaveCommit).not.toHaveBeenCalled();
+      expect(mockExecFileSync).not.toHaveBeenCalled();
+      expect(stderrSpy).toHaveBeenCalledWith('(dry-run — not saved or committed)\n');
+    });
+
+    test('--all --dry-run skips commit, push, and save', async () => {
+      mockExecSync.mockReturnValueOnce('diff --git a/test.js b/test.js\n+new code');
+      process.argv = ['node', 'cli.js', '--all', '--dry-run'];
+      await cli.main();
+      expect(mockGenerateCommitMessage).toHaveBeenCalled();
+      expect(mockSaveCommit).not.toHaveBeenCalled();
+      expect(mockExecFileSync).not.toHaveBeenCalled();
+    });
+  });
+
   describe('--commit / -c', () => {
     test('--commit with staged calls execFileSync with array args (injection regression test)', async () => {
       mockExecSync.mockReturnValueOnce('diff --git a/test.js b/test.js\n+new code');

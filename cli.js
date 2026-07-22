@@ -20,10 +20,11 @@ Usage:
   git-commit-gen --help                  Show this help
   git-commit-gen -m "message"            Use custom message (skips AI)
   git-commit-gen --version, -v           Show version
+  git-commit-gen --dry-run               Preview message without committing
   `);
 }
 
-const KNOWN_FLAGS = ['--help', '--history', '-h', '--version', '-v', '--all', '-a', '--commit', '-c', '--message', '-m'];
+const KNOWN_FLAGS = ['--help', '--history', '-h', '--version', '-v', '--all', '-a', '--commit', '-c', '--message', '-m', '--dry-run'];
 
 function findUnknownFlags(args) {
   return args.filter(arg => arg.startsWith('-') && !KNOWN_FLAGS.includes(arg));
@@ -85,6 +86,7 @@ async function main() {
 
   const isAll = args.includes('--all') || args.includes('-a');
   const isCommit = args.includes('--commit') || args.includes('-c');
+  const isDryRun = args.includes('--dry-run');
   const mIndex = args.indexOf('-m');
   const userMessage = mIndex !== -1 ? args[mIndex + 1] : null;
 
@@ -166,10 +168,14 @@ async function main() {
 
     const messageType = userMessage ? (userMessage.match(/^(\w+)/) || ['', 'custom'])[1] : result.type;
     const stats = diffParser.parseDiff(diff);
-    saveCommit(diff, formatted, messageType, stats);
+    if (isDryRun) {
+      process.stderr.write('(dry-run — not saved or committed)\n');
+    } else {
+      saveCommit(diff, formatted, messageType, stats);
+    }
   }
 
-  if (diff && (isAll || isCommit)) {
+  if (diff && (isAll || isCommit) && !isDryRun) {
     process.stderr.write('(committing...)\n');
     const parts = formatted.split(/\n\n/);
     const commitArgs = ['commit'];
@@ -180,7 +186,7 @@ async function main() {
     process.stderr.write('(committed)\n');
   }
 
-  if (isAll) {
+  if (isAll && !isDryRun) {
     process.stderr.write('(pushing...)\n');
     try {
       execFileSync('git', ['push'], { stdio: 'pipe', encoding: 'utf8' });
@@ -192,7 +198,7 @@ async function main() {
     }
   }
 
-  if (formatted) {
+  if (formatted && !isDryRun) {
     try {
       switch (process.platform) {
         case 'win32':

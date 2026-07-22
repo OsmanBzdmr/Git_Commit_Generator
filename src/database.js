@@ -4,9 +4,9 @@ const fs = require('fs');
 const { promisify } = require('util');
 
 const dbDir = path.join(__dirname, '..', 'data');
-const dbPath = path.join(dbDir, 'commits.db');
+const dbPath = process.env.DB_PATH || path.join(dbDir, 'commits.db');
 
-if (!fs.existsSync(dbDir)) {
+if (dbPath !== ':memory:' && !fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 

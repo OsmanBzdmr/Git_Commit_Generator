@@ -1,8 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 
-// Use process.env to signal test mode to database module
-process.env.NODE_ENV = 'test';
+// Use in-memory database for tests
+process.env.DB_PATH = ':memory:';
 
 const database = require('../src/database');
 
