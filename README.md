@@ -2,7 +2,7 @@
 
 ![Test](https://github.com/OsmanBzdmr/Git_Commit_Generator/actions/workflows/test.yml/badge.svg)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen)
-![Version](https://img.shields.io/badge/version-1.3.2-blue)
+![Version](https://img.shields.io/badge/version-1.3.3-blue)
 ![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
 
 AI-powered CLI tool that analyzes your `git diff` and generates clean, conventional commit messages using Groq (Llama 3.3 70B).
@@ -92,6 +92,7 @@ If `GROQ_API_KEY` is missing or the API call fails, the tool falls back to a loc
 | `GROQ_API_KEY` | — | Your Groq API key (required for AI mode) |
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Groq model to use |
 | `STDIN_TIMEOUT_MS` | `5000` | Timeout in milliseconds for stdin input |
+| `DB_PATH` | `./data/commits.db` | Custom SQLite database path |
 
 ---
 
@@ -129,13 +130,13 @@ npm test
 
 | Module | Coverage | Tests |
 |--------|:--------:|:-----:|
-| `cli.js` | 95% | 32 |
+| `cli.js` | 95% | 39 |
 | `diffParser.js` | 100% | 11 |
 | `fallbackGenerator.js` | 100% | 18 |
-| `msgFormatter.js` | 100% | 25 |
-| `groqApi.js` | 98% | 23 |
+| `msgFormatter.js` | 100% | 27 |
+| `groqApi.js` | 98% | 26 |
 | `database.js` | 83% | 8 |
-| **Total** | **95%** | **127** |
+| **Total** | **95%** | **129** |
 
 ---
 
