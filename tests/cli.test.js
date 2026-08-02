@@ -340,7 +340,24 @@ describe('CLI', () => {
       expect(mockExecSync).toHaveBeenCalledWith('git diff', { stdio: 'pipe', encoding: 'utf8' });
       expect(mockGenerateCommitMessage).not.toHaveBeenCalled();
       expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push'], expect.anything());
-      expect(stderrSpy).not.toHaveBeenCalledWith('No changes to commit.\n');
+      expect(stderrSpy).toHaveBeenCalledWith('No changes to commit.\n');
+      expect(exitSpy).not.toHaveBeenCalled();
+    });
+
+    test('--all with no diff warns but still pushes (no exit)', async () => {
+      process.argv = ['node', 'cli.js', '--all'];
+      await cli.main();
+      expect(stderrSpy).toHaveBeenCalledWith('No changes to commit.\n');
+      expect(exitSpy).not.toHaveBeenCalled();
+      expect(mockExecFileSync).toHaveBeenCalledWith('git', ['push'], expect.anything());
+    });
+
+    test('save failure is caught and does not crash the process', async () => {
+      process.stdin = mockStdin('diff --git a/test.js b/test.js\n+new code');
+      mockSaveCommit.mockRejectedValue(new Error('disk full'));
+      process.argv = ['node', 'cli.js'];
+      await cli.main();
+      expect(stderrSpy).toHaveBeenCalledWith('(failed to save to history: disk full)\n');
       expect(exitSpy).not.toHaveBeenCalled();
     });
 
@@ -382,7 +399,7 @@ describe('CLI', () => {
       await cli.main();
       expect(mockExecFileSync).toHaveBeenCalledWith(
         'powershell',
-        ['-c', 'Set-Clipboard'],
+        ['-NoProfile', '-c', 'Set-Clipboard'],
         { input: 'feat: test message\n\nbody text' }
       );
     });

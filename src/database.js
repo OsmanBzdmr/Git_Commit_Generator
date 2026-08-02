@@ -6,8 +6,8 @@ const { promisify } = require('util');
 const dbDir = path.join(__dirname, '..', 'data');
 const dbPath = process.env.DB_PATH || path.join(dbDir, 'commits.db');
 
-if (dbPath !== ':memory:' && !fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+if (dbPath !== ':memory:') {
+  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 }
 
 const db = new sqlite3.Database(dbPath, (err) => {

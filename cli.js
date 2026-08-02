@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-require('dotenv').config({ path: __dirname + '/.env' });
+require('dotenv').config({ path: __dirname + '/.env', quiet: true });
 const groqApi = require('./src/groqApi');
 const msgFormatter = require('./src/msgFormatter');
 const diffParser = require('./src/diffParser');
@@ -102,8 +102,8 @@ async function main() {
   if (isAll || isCommit) {
     const result = await getDiffFromGit();
     if (!result.diff) {
+      process.stderr.write('No changes to commit.\n');
       if (isCommit) {
-        process.stderr.write('No changes to commit.\n');
         process.exit(1);
       }
     } else {
@@ -171,7 +171,11 @@ async function main() {
     if (isDryRun) {
       process.stderr.write('(dry-run — not saved or committed)\n');
     } else {
-      saveCommit(diff, formatted, messageType, stats);
+      try {
+        await saveCommit(diff, formatted, messageType, stats);
+      } catch (e) {
+        process.stderr.write('(failed to save to history: ' + e.message + ')\n');
+      }
     }
   }
 
@@ -202,7 +206,7 @@ async function main() {
     try {
       switch (process.platform) {
         case 'win32':
-          execFileSync('powershell', ['-c', 'Set-Clipboard'], { input: formatted });
+          execFileSync('powershell', ['-NoProfile', '-c', 'Set-Clipboard'], { input: formatted });
           break;
         case 'darwin':
           execFileSync('pbcopy', { input: formatted });
